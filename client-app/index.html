@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Note App</title>
+    	<meta charset="utf-8" />
+		<link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+		<div id="app">
+			<header>
+				<h1>Note App</h1>
+			</header>
+			<section id="notes">
+				<!-- notes will be inserted here -->	
+			</section>
+			<footer>
+				built on backbone.js
+			</footer>
+		</div>
+		<script src="json2.js"></script>
+		<script src="jquery-2.0.3.js"></script>
+		<script src="underscore.js"></script>
+		<script src="backbone.js"></script>
+		<script src="client-app.js"></script>
+		<script type="text/template" id="note-template">
+			<h1 class="note-heading"><%- name %></h1>
+			<section class="note-body"><%- body %></section>
+		</script>
+    </body>
+</html>
