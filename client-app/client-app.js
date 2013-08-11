@@ -5,6 +5,20 @@
 function main() {
 
 	/*
+	 * configure markdown parser
+	 */
+	marked.setOptions({
+		gfm: true,
+		tables: true,
+		breaks: false,
+		pedantic: false,
+		sanitize: true,
+		smartLists: true,
+		smartypants: false,
+		langPrefix: 'lang-'
+	});
+
+	/*
 	 * define model for a note
 	 */
 	var Note = Backbone.Model.extend({
@@ -14,13 +28,21 @@ function main() {
 			'deleted':false
 		},
 		url: '/note',
-		getNameHTML: function() {
+		getName: function() {
 			return this.get('name');
 		},
 		setName: function(newName) {
 			this.set('name', newName);
 		},
 		getBodyHTML: function() {
+			try {
+				var htmlText =  marked( this.get('markdown') );
+				return htmlText;
+			} catch (ex) {
+				return 'Markdown parser error: ' + ex
+			}
+		},
+		getMarkdown: function(markdown) {
 			return this.get('markdown');
 		},
 		setMarkdown: function(markdown) {
@@ -31,8 +53,6 @@ function main() {
 		},
 		setDeleted: function(newDeleted) {
 			this.set('deleted', newDeleted);
-			console.log('url: ' + this.url);
-			this.save();
 		}
 	});
 
@@ -45,27 +65,72 @@ function main() {
 		template: _.template( $('#note-template').html() ),
 		events: {
 			'click input.delete': 'deleteNote',
-			'click input.edit': 'editNote'
+			'click input.edit': 'editNote',
+			'click h1.note-heading': 'toggleActive'
+		},
+		toggleActive: function(event) {
+			event.stopPropagation();
+			event.preventDefault();
+			console.log('set active');
+			$('section.note-body', this.$el).toggleClass('inactive-note');
 		},
 		deleteNote: function(event) {
 			event.stopPropagation();
 			console.log('delete note');
 			this.model.setDeleted(true);
+			this.model.save();
+			this.remove();
 		},
 		editNote: function(event) {
 			event.stopPropagation();
 			console.log('edit note');
+			// invoke edit note view
+			var editView = new EditNoteView({'normalView':this, 'model':this.model});
+			$('body').append(editView.render().$el);
 		},
 		render: function() {
-			console.log(this.model.toJSON());
-			/*
-			 * using getter functions to decouple view from
-			 * technical details of data in the model
-			 */
-			var name = this.model.getNameHTML();
-			var body = this.model.getBodyHTML();
-			this.$el.html(this.template({'name':name, 'body':body}));
-			// return self for chaining
+			var name = this.model.getName();
+			var bodyHTML = jQuery.parseHTML(this.model.getBodyHTML());
+			this.$el.html(this.template({'name':name}));
+			$('.note-body', this.$el).first().append(bodyHTML);
+			return this; 
+		}
+	});
+
+	/*
+	 * define edit view for note
+	 */
+	var EditNoteView = Backbone.View.extend({
+		tagName: 'div',
+		className: 'edit-note-pane',
+		template: _.template( $('#edit-note-template').html() ),
+		events: {
+			'click input.delete': 'deleteNote',
+			'click input.close': 'saveAndCloseNote'
+		},
+		deleteNote: function(event) {
+			event.stopPropagation();
+			console.log('delete note');
+			this.model.setDeleted(true);
+			this.model.save();
+			this.options.normalView.remove();
+			this.remove();
+		},
+		saveAndCloseNote: function(event) {
+			event.stopPropagation();
+			console.log('save and close note');
+			var name = $('.edit-name', this.$el).first().val();
+			var markdown = $('.edit-markdown', this.$el).first().val();
+			this.model.setName(name);
+			this.model.setMarkdown(markdown);
+			this.model.save();
+			this.options.normalView.render();
+			this.remove();
+		},
+		render: function() {
+			var name = this.model.getName();
+			var markdown = this.model.getMarkdown();
+			this.$el.html(this.template({'name':name, 'markdown':markdown}));
 			return this; 
 		}
 	});
@@ -90,9 +155,17 @@ function main() {
 			this.collectionToMonitor = options.collectionToMonitor;
 			this.listenTo(this.collectionToMonitor, 'add', this.addNote);
 		},
+		events: {
+			'click input.add': 'addNewNote'
+		},
+		addNewNote: function() {
+			//var newNote = new Note();
+			//this.collectionToMonitor.add(newNote);
+			this.collectionToMonitor.create();
+		},
 		addNote: function(note) {
 			var view = new NoteView({'model':note});
-			$('#notes').append(view.render().$el);
+			$('#notes').prepend(view.render().$el);
 		},
 		render: function() {
 			

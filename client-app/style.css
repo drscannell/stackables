@@ -1,16 +1,67 @@
 h1,h2,h3,h4,h5,h6 {font-weight:normal;margin:0;padding:0;}
 body {
 	margin:0;
-	padding:5px;
+	padding:0;
 	font-family:sans-serif;
+	background:#ddd;
 }
+
+header {
+	position:relative;
+	text-align:center;
+	background-color: #bbb;
+	color: #fff;
+	border-radius: 5px;
+	padding: 10px;
+	margin:5px;
+}
+
+input.add {
+	position:absolute;
+	top:5px;
+	right:5px;
+	bottom:5px;
+}
+
+header > h1 {
+	font-size:1.5em;
+	line-height:1.2em;
+	letter-spacing:2px;
+}
+
+footer {
+	text-align:center;
+	margin: 5px;
+	font-size: 0.8em;
+	background-color: #bbb;
+	color: #fff;
+	border-radius:5px;
+	padding:10px;
+}
+
+/* standard button */
+
+input.button {
+	background:#aaa;
+	color:#ddd;
+	border:1px #000;
+	border-radius:5px;
+	width:20%;
+	vertical-align:middle;
+}
+input.button:hover {
+	color:#fff;
+}
+
+/* normal note view */
 
 article.note {
 	border:1px solid #888;
 	border-radius:5px;
 	padding: 0;
 	overflow:hidden;
-	margin: 10px 0 10px 0;
+	margin: 10px 5px 10px 5px;
+	background:#fff;
 }
 h1.note-heading {
 	font-size:1.2em;
@@ -20,53 +71,56 @@ h1.note-heading {
 	background-color: #888;
 	color: #fff;
 	text-align:center;
-	letter-spacing:2px;
+	letter-spacing:1px;
+	position:relative;
 }
 h1.note-heading > span.name {
 	display:inline-block;
-	width:50%;
 	vertical-align:middle;
 }
-h1.note-heading > input {
-	background:#aaa;
-	color:#fff;
-	border:1px #000;
-	border-radius:5px;
-	height:50px;
-	width:20%;
-	/*margin:0 10px 0 10px;*/
-	vertical-align:middle;
-}
-h1.note-heading > input:hover {
-	background:#ccc;
+h1.note-heading > input.edit {
+	position:absolute;
+	top:5px;
+	right:5px;
+	bottom:5px;
 }
 section.note-body {
 	margin:0;
 	padding:5px;
-	min-height:50px;
 }
+section.inactive-note {
+	height:30px;
+	opacity:0.2;
+}
+/* edit note view */
 
-header {
+div.edit-note-pane {
+	z-index: 10;
+	position:fixed;
+	top:0px;
+	left:0px;
+	right:0px;
+	bottom:0px;
+	background:#fff;
 	text-align:center;
-	margin-bottom: 5px;
-	background-color: #bbb;
-	color: #fff;
-	border-radius: 5px;
+}
+div.edit-note-buttons {
+	text-align:center;
+	margin: 0 0 10px 0;
 	padding: 10px;
+	background:#888;
+}
+input.edit-name {
+	display:inline-block;
+	width:95%;
+	margin-bottom:10px;
+	padding:5px;
+}
+textarea.edit-markdown {
+	display:inline-block;
+	width:95%;
+	resize:verical;
+	min-height:24em;
+	padding:5px;
 }
 
-header > h1 {
-	font-size:1.5em;
-	line-height:1.2em;
-	margin:0;
-}
-
-footer {
-	text-align:center;
-	margin-top: 5px;
-	font-size: 0.8em;
-	background-color: #bbb;
-	color: #fff;
-	border-radius:5px;
-	padding:10px;
-}

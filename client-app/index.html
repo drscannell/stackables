@@ -9,7 +9,8 @@
     <body>
 		<div id="app">
 			<header>
-				<h1>Note App</h1>
+				<h1>Notes</h1>
+				<input type="button" class="button add" value="add" />
 			</header>
 			<section id="notes">
 				<!-- notes will be inserted here -->	
@@ -22,14 +23,22 @@
 		<script src="jquery-2.0.3.js"></script>
 		<script src="underscore.js"></script>
 		<script src="backbone.js"></script>
+		<script src="marked.js"></script>
 		<script src="client-app.js"></script>
 		<script type="text/template" id="note-template">
 			<h1 class="note-heading">
-				<input type="button" class="delete" value="delete" />
 				<span class="name"><%- name %></span>
-				<input type="button" class="edit" value="edit" />
+				<input type="button" class="button edit" value="edit" />
 			</h1>
-			<section class="note-body"><%- body %></section>
+			<section class="note-body inactive-note"></section>
+		</script>
+		<script type="text/template" id="edit-note-template">
+			<header class="edit-note-buttons">
+				<input type="button" class="button delete" value="delete" />
+				<input type="button" class="button close" value="close" />
+			</header>
+			<input type="text" class="edit-name" value="<%- name %>" />
+			<textarea class="edit-markdown"><%- markdown %></textarea>
 		</script>
     </body>
 </html>
