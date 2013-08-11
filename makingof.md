@@ -252,6 +252,61 @@ http://localhost:5000/notes
 
 		$(document).ready(main);
 
+20. At the commandline, add a free mongo database
+
+		$ heroku addons:add mongolab:sandbox
+
+21. Heroku should have created an environment variable with your
+login credential-bearing URI. At the command line:
+
+		$ heroku config | grep MONGOLAB_URI
+
+Store that in a local environment variable for testing purposes:
+
+		$ export MONGO_LAB_URI=<paste in the URI here>
+
+Add the following code to server-app.js, just before the data 
+endpoints and run a foreman simulation to ensure that your
+environment variables are set up correctly:
+
+		/* --- mongolab --- */
+
+		var mongoURI = process.env.MONGO_LAB_URI || process.env.MONGOLAB_URI || null;
+		if (mongoURI == null) throw new Error('mongo uri env var not set up');
+
+22. At the command line, install mongoose. We're going to use it to make
+our database relationship simpler to manage:
+
+		$ npm install mongoose
+
+We then also need to add it to the dependencies in package.json.
+
+23. Let's try to make a connection. This can be a major pain point if it
+doesn't just work. Update the mongolab section of server-app.js as
+follows:
+
+		/* --- mongolab --- */
+
+		var mongoURI = process.env.MONGO_LAB_URI || process.env.MONGOLAB_URI || null;
+		if (mongoURI == null) throw new Error('mongo uri env var not set up');
+		var mongoose = require('mongoose');
+		mongoose.connect(mongoURI);
+		var db = mongoose.connection;
+		db.on('error', console.error.bind(console, 'connection error:'));
+		db.once('open', function callback () {
+			console.log('Successfully connected to mongo');
+		});
+
+Run a foreman simulation. If it seems
+like you've done nothing wrong, but it's still failing, consider if you are behind 
+a corporate firewall. You may have to install mongo locally and configure a test 
+environment.
+
+
+
+
+
+
 
 
 

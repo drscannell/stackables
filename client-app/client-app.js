@@ -10,13 +10,29 @@ function main() {
 	var Note = Backbone.Model.extend({
 		defaults: {
 			'name':'Untitled Note',
-			'markdown':'[enter note text here]'
+			'markdown':'[enter note text here]',
+			'deleted':false
 		},
+		url: '/note',
 		getNameHTML: function() {
 			return this.get('name');
 		},
+		setName: function(newName) {
+			this.set('name', newName);
+		},
 		getBodyHTML: function() {
 			return this.get('markdown');
+		},
+		setMarkdown: function(markdown) {
+			this.set('markdown', markdown);
+		},
+		getDeleted: function() {
+			return this.get('deleted');
+		},
+		setDeleted: function(newDeleted) {
+			this.set('deleted', newDeleted);
+			console.log('url: ' + this.url);
+			this.save();
 		}
 	});
 
@@ -27,7 +43,21 @@ function main() {
 		tagName: 'article',
 		className: 'note',
 		template: _.template( $('#note-template').html() ),
+		events: {
+			'click input.delete': 'deleteNote',
+			'click input.edit': 'editNote'
+		},
+		deleteNote: function(event) {
+			event.stopPropagation();
+			console.log('delete note');
+			this.model.setDeleted(true);
+		},
+		editNote: function(event) {
+			event.stopPropagation();
+			console.log('edit note');
+		},
 		render: function() {
+			console.log(this.model.toJSON());
 			/*
 			 * using getter functions to decouple view from
 			 * technical details of data in the model
