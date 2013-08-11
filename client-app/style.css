@@ -22,6 +22,24 @@ h1.note-heading {
 	text-align:center;
 	letter-spacing:2px;
 }
+h1.note-heading > span.name {
+	display:inline-block;
+	width:50%;
+	vertical-align:middle;
+}
+h1.note-heading > input {
+	background:#aaa;
+	color:#fff;
+	border:1px #000;
+	border-radius:5px;
+	height:50px;
+	width:20%;
+	/*margin:0 10px 0 10px;*/
+	vertical-align:middle;
+}
+h1.note-heading > input:hover {
+	background:#ccc;
+}
 section.note-body {
 	margin:0;
 	padding:5px;
