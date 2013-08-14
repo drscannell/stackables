@@ -7,17 +7,49 @@ var express = require('express');
 var app = express();
 app.listen(process.env.PORT || 8000);
 app.use(express.bodyParser());
+app.use(express.cookieParser('321!!'));
 app.use(function(req,res,next){
 	console.log('\n' + req.method + ' ' + req.url);
 	next();
 });
 
 /*
+ * authentication
+ */
+var credentials = [
+	{'username':'admin', 
+		'password':'01cdfd452c3b789de8c51cdea59d27b7', 
+		'email':''},
+	{'username':'ccaruccio', 
+		'password':'effaf52ddbf8d5ac2d8669c40cabeefb', 
+		'email':'christina.caruccio@gmail.com'},
+	{'username':'dscannell', 
+		'password':'effaf52ddbf8d5ac2d8669c40cabeefb', 
+		'email':'danscannell@gmail.com'},
+];
+var PASSWORD_MAXAGE = 86400000;
+var COOKIE_NAME = 'clutter.loggedin';
+
+app.use(function(req,res,next){
+	if ( isLoggedInAsAdmin(req) ) {
+		next();
+	} else if ( isLoggedInAsUser(req) ) {
+		next();
+	} else {
+		console.log('  not logged in. Sending login page.');
+		res.sendfile('login.xhtml');
+	}
+});
+function isLoggedInAsAdmin(req) { return (req.signedCookies[COOKIE_NAME] == 'admin'); }
+function isLoggedInAsUser(req) { return (req.signedCookies[COOKIE_NAME]); }
+function getUsername(req) { return req.signedCookies[COOKIE_NAME]; }
+
+/*
  * Mongo URI
  * 
  * Get URI from environment variables or fail
  */
-var mongoURI = process.env.MONGOLAB_URI || process.env.LOCAL_MONGO_URI  || null;
+var mongoURI = process.env.MONGO_LAB_URI || process.env.MONGOLAB_URI || process.env.LOCAL_MONGO_URI  || null;
 if (mongoURI == null) throw new Error('Mongo URI environment variable not set up');
 
 /*
@@ -121,6 +153,50 @@ function getAllNotes(req, res, attempts) {
 		res.send({'error':'Failed to connect to database.'});
 	}
 }
+
+/* --- login endpoints --- */
+
+/*
+ * POST '/login'
+ *
+ * A very simple credentials resolver
+ * The benefit of keeping the credentials hardcoded for now
+ * is that users can log in and use the basic functionality 
+ * without needing to establish a database connection.
+ * Scaleable? No, of course not.
+ * 
+ */
+app.post('/login', function(req, res){
+	console.log('login attempt');
+	console.log('  name: ' + req.body.name);
+	console.log('  pass: ' + req.body.password);
+	var i = 0;
+	var match = null;
+	while ( i < credentials.length && match == null ) {
+		if ( req.body.name === credentials[i].username ) match = credentials[i];
+		i++;
+	}
+	if ( !match ) {
+		console.log('nonexistent username');
+		res.status(401).send({'error':'nonexistent username'});
+	} else if ( req.body.password === match.password ) {
+		console.log('  logged in as ' + req.body.name);
+		res.cookie(COOKIE_NAME, req.body.name, { signed: true, maxAge:PASSWORD_MAXAGE });
+		res.send({'success':'credentials accepted'});
+	} else {
+		console.log('wrong password');
+		res.status(401).send({'error':'wrong password'});
+	}
+});
+/*
+ * GET '/logout'
+ * 
+ */
+app.get('/logout', function(req, res){
+	console.log('logout');
+	res.clearCookie(COOKIE_NAME);
+	res.send('logged out');	
+});
 /* --- data endpoints --- */
 
 app.get('/notes', function(req, res) {
