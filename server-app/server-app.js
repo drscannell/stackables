@@ -7,17 +7,58 @@ var express = require('express');
 var app = express();
 app.listen(process.env.PORT || 8000);
 app.use(express.bodyParser());
+app.use(express.cookieParser('321!!'));
 app.use(function(req,res,next){
 	console.log('\n' + req.method + ' ' + req.url);
+	console.log('  username: ' + getUsername(req) );
 	next();
 });
+
+/*
+ * authentication
+ */
+var credentials = [
+	{'username':'admin', 
+		'password':'b921a42c761dbfff191c1aebe556d6f7', /* digdug */
+		'email':''},
+	{'username':'ccaruccio', 
+		'password':'fea0f1f6fede90bd0a925b4194deac11', /* cheese */
+		'email':'christina.caruccio@gmail.com'},
+	{'username':'dscannell', 
+		'password':'b921a42c761dbfff191c1aebe556d6f7', 
+		'email':'danscannell@gmail.com'},
+];
+var PASSWORD_MAXAGE = 864000000; // ten days
+var COOKIE_NAME = 'clutter.loggedin';
+
+app.use(function(req,res,next){
+	if ( isLoggedInAsAdmin(req) ) {
+		next();
+	} else if ( isLoggedInAsUser(req) ) {
+		next();
+	} else if ( req.url == '/login' ) {
+		next();
+	} else {
+		console.log('  not logged in. Sending login page.');
+		res.sendfile('client-app/login.html');
+	}
+});
+function isLoggedInAsAdmin(req) { return (req.signedCookies[COOKIE_NAME] == 'admin'); }
+function isLoggedInAsUser(req) { return (req.signedCookies[COOKIE_NAME]); }
+function getUsername(req) { 
+	try {
+		return req.signedCookies[COOKIE_NAME]; 
+	} catch(ex) {
+		return null;
+	}
+}
 
 /*
  * Mongo URI
  * 
  * Get URI from environment variables or fail
  */
-var mongoURI = process.env.MONGOLAB_URI || process.env.LOCAL_MONGO_URI  || null;
+var mongoURI = process.env.MONGO_LAB_URI || process.env.MONGOLAB_URI || process.env.LOCAL_MONGO_URI  || null;
 if (mongoURI == null) throw new Error('Mongo URI environment variable not set up');
 
 /*
@@ -51,6 +92,7 @@ db.once('open', function(){
 var noteSchema = mongoose.Schema({
 	'name': String,
 	'markdown': String,
+	'createdby': String,
 	'deleted': Boolean
 });
 var Note = mongoose.model('Note', noteSchema);
@@ -59,10 +101,17 @@ var Note = mongoose.model('Note', noteSchema);
  * Update a single note
  */
 function updateNote(req, res) {
-	console.log('app.post');
-	console.log(req.body);
 	var noteId = req.body._id;
 	delete req.body._id;
+	/*
+	 * if empty, fill out createdby
+	 */
+	if( !('createdby' in req.body) ) {
+		req.body.createdby = getUsername(req);
+	}
+	console.log('  name: ' + req.body.name);
+	console.log('  createdby: ' + req.body.createdby);
+	console.log('  deleted: ' + req.body.deleted);
 	Note.findByIdAndUpdate(noteId, req.body, function(err, doc) {
 		if (!err) {
 			console.log('successfully updated');
@@ -78,8 +127,9 @@ function updateNote(req, res) {
  * Add a single note
  */
 function addNote(req, res) {
-	console.log('addNote');
-	console.log(req.body);
+	req.body.createdby = getUsername(req);
+	console.log('  name: ' + req.body.name);
+	console.log('  createdby: ' + req.body.createdby);
 	var newNote = new Note(req.body);
 	newNote.save(function(err, note) {
 		if (!err) {
@@ -100,11 +150,12 @@ function addNote(req, res) {
  * times if the db connection is not open.
  */
 function getAllNotes(req, res, attempts) {
+	var query = {'deleted':false, 'createdby':getUsername(req)};
+	console.log('  get all notes created by ' + query.createdby);
 	if (isConnected) {
-		Note.find({'deleted':false}, function(err, notes) {
+		Note.find( query, function(err, notes) {
 			if(!err) {
 				console.log('Retrieved ' + notes.length + ' notes from mongo');
-				console.log(notes);
 				res.send(notes);
 			} else {
 				res.status(501);
@@ -121,6 +172,50 @@ function getAllNotes(req, res, attempts) {
 		res.send({'error':'Failed to connect to database.'});
 	}
 }
+
+/* --- login endpoints --- */
+
+/*
+ * POST '/login'
+ *
+ * A very simple credentials resolver
+ * The benefit of keeping the credentials hardcoded for now
+ * is that users can log in and use the basic functionality 
+ * without needing to establish a database connection.
+ * Scaleable? No, of course not.
+ * 
+ */
+app.post('/login', function(req, res){
+	console.log('login attempt');
+	console.log('  name: ' + req.body.name);
+	console.log('  pass: ' + req.body.password);
+	var i = 0;
+	var match = null;
+	while ( i < credentials.length && match == null ) {
+		if ( req.body.name === credentials[i].username ) match = credentials[i];
+		i++;
+	}
+	if ( !match ) {
+		console.log('nonexistent username');
+		res.status(401).send({'error':'nonexistent username'});
+	} else if ( req.body.password === match.password ) {
+		console.log('  logged in as ' + req.body.name);
+		res.cookie(COOKIE_NAME, req.body.name, { signed: true, maxAge:PASSWORD_MAXAGE });
+		res.send({'success':'credentials accepted'});
+	} else {
+		console.log('wrong password');
+		res.status(401).send({'error':'wrong password'});
+	}
+});
+/*
+ * GET '/logout'
+ * 
+ */
+app.post('/logout', function(req, res){
+	console.log('logout');
+	res.clearCookie(COOKIE_NAME);
+	res.send('logged out');	
+});
 /* --- data endpoints --- */
 
 app.get('/notes', function(req, res) {

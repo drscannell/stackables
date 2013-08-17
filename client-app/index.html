@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <title>Note App</title>
+        <title>stackables</title>
     	<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="stylesheet" href="style.css" />
@@ -9,14 +9,14 @@
     <body>
 		<div id="app">
 			<header>
-				<h1>Notes</h1>
+				<input type="button" class="button logout" value="logout" />
 				<input type="button" class="button add" value="add" />
 			</header>
 			<section id="notes">
 				<!-- notes will be inserted here -->	
 			</section>
 			<footer>
-				built on backbone.js
+				 backbone.js | node.js | marked.js
 			</footer>
 		</div>
 		<script src="json2.js"></script>
@@ -28,9 +28,10 @@
 		<script type="text/template" id="note-template">
 			<h1 class="note-heading">
 				<span class="name"><%- name %></span>
-				<input type="button" class="button edit" value="edit" />
 			</h1>
-			<section class="note-body inactive-note"></section>
+			<section class="note-body inactive-note">
+				<input type="button" class="button edit" value="edit" />
+			</section>
 		</script>
 		<script type="text/template" id="edit-note-template">
 			<header class="edit-note-buttons">
@@ -38,7 +39,9 @@
 				<input type="button" class="button close" value="close" />
 			</header>
 			<input type="text" class="edit-name" value="<%- name %>" />
-			<textarea class="edit-markdown"><%- markdown %></textarea>
+			<div class="textarea">
+				<textarea class="edit-markdown"><%- markdown %></textarea>
+			</div>
 		</script>
     </body>
 </html>
