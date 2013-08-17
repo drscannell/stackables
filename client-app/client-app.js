@@ -63,6 +63,12 @@ function main() {
 		tagName: 'article',
 		className: 'note',
 		template: _.template( $('#note-template').html() ),
+		initialize: function(options) {
+			/*
+			 * re-render when model changes
+			 */
+			this.listenTo(this.model, 'change', this.render);
+		},
 		events: {
 			'click input.delete': 'deleteNote',
 			'click input.edit': 'editNote',
@@ -113,7 +119,7 @@ function main() {
 			console.log('delete note');
 			this.model.setDeleted(true);
 			this.model.save();
-			this.options.normalView.remove();
+			//this.options.normalView.remove();
 			this.remove();
 		},
 		saveAndCloseNote: function(event) {
@@ -124,7 +130,7 @@ function main() {
 			this.model.setName(name);
 			this.model.setMarkdown(markdown);
 			this.model.save();
-			this.options.normalView.render();
+			//this.options.normalView.render();
 			this.remove();
 		},
 		render: function() {
@@ -153,19 +159,26 @@ function main() {
 		el: $('#app'),
 		initialize: function(options) {
 			this.collectionToMonitor = options.collectionToMonitor;
-			this.listenTo(this.collectionToMonitor, 'add', this.addNote);
+			this.listenTo(this.collectionToMonitor, 'add', this.addNoteView);
 		},
 		events: {
-			'click input.add': 'addNewNote'
+			'click input.add': 'addNewNote',
+			'click input.logout': 'logout'
 		},
 		addNewNote: function() {
-			//var newNote = new Note();
-			//this.collectionToMonitor.add(newNote);
-			this.collectionToMonitor.create();
+			var note = new Note();
+			this.collectionToMonitor.add(note);
+			var editView = new EditNoteView({'model':note});
+			$('body').append(editView.render().$el);
 		},
-		addNote: function(note) {
+		addNoteView: function(note) {
 			var view = new NoteView({'model':note});
 			$('#notes').prepend(view.render().$el);
+		},
+		logout: function() {
+			jQuery.post('logout', function(data) {
+				location.reload();
+			});
 		},
 		render: function() {
 			

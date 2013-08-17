@@ -10,6 +10,7 @@ app.use(express.bodyParser());
 app.use(express.cookieParser('321!!'));
 app.use(function(req,res,next){
 	console.log('\n' + req.method + ' ' + req.url);
+	console.log('  username: ' + getUsername(req) );
 	next();
 });
 
@@ -18,16 +19,16 @@ app.use(function(req,res,next){
  */
 var credentials = [
 	{'username':'admin', 
-		'password':'01cdfd452c3b789de8c51cdea59d27b7', 
+		'password':'b921a42c761dbfff191c1aebe556d6f7', /* digdug */
 		'email':''},
 	{'username':'ccaruccio', 
-		'password':'effaf52ddbf8d5ac2d8669c40cabeefb', 
+		'password':'fea0f1f6fede90bd0a925b4194deac11', /* cheese */
 		'email':'christina.caruccio@gmail.com'},
 	{'username':'dscannell', 
-		'password':'effaf52ddbf8d5ac2d8669c40cabeefb', 
+		'password':'b921a42c761dbfff191c1aebe556d6f7', 
 		'email':'danscannell@gmail.com'},
 ];
-var PASSWORD_MAXAGE = 86400000;
+var PASSWORD_MAXAGE = 864000000; // ten days
 var COOKIE_NAME = 'clutter.loggedin';
 
 app.use(function(req,res,next){
@@ -35,14 +36,22 @@ app.use(function(req,res,next){
 		next();
 	} else if ( isLoggedInAsUser(req) ) {
 		next();
+	} else if ( req.url == '/login' ) {
+		next();
 	} else {
 		console.log('  not logged in. Sending login page.');
-		res.sendfile('login.xhtml');
+		res.sendfile('client-app/login.html');
 	}
 });
 function isLoggedInAsAdmin(req) { return (req.signedCookies[COOKIE_NAME] == 'admin'); }
 function isLoggedInAsUser(req) { return (req.signedCookies[COOKIE_NAME]); }
-function getUsername(req) { return req.signedCookies[COOKIE_NAME]; }
+function getUsername(req) { 
+	try {
+		return req.signedCookies[COOKIE_NAME]; 
+	} catch(ex) {
+		return null;
+	}
+}
 
 /*
  * Mongo URI
@@ -83,6 +92,7 @@ db.once('open', function(){
 var noteSchema = mongoose.Schema({
 	'name': String,
 	'markdown': String,
+	'createdby': String,
 	'deleted': Boolean
 });
 var Note = mongoose.model('Note', noteSchema);
@@ -91,10 +101,17 @@ var Note = mongoose.model('Note', noteSchema);
  * Update a single note
  */
 function updateNote(req, res) {
-	console.log('app.post');
-	console.log(req.body);
 	var noteId = req.body._id;
 	delete req.body._id;
+	/*
+	 * if empty, fill out createdby
+	 */
+	if( !('createdby' in req.body) ) {
+		req.body.createdby = getUsername(req);
+	}
+	console.log('  name: ' + req.body.name);
+	console.log('  createdby: ' + req.body.createdby);
+	console.log('  deleted: ' + req.body.deleted);
 	Note.findByIdAndUpdate(noteId, req.body, function(err, doc) {
 		if (!err) {
 			console.log('successfully updated');
@@ -110,8 +127,9 @@ function updateNote(req, res) {
  * Add a single note
  */
 function addNote(req, res) {
-	console.log('addNote');
-	console.log(req.body);
+	req.body.createdby = getUsername(req);
+	console.log('  name: ' + req.body.name);
+	console.log('  createdby: ' + req.body.createdby);
 	var newNote = new Note(req.body);
 	newNote.save(function(err, note) {
 		if (!err) {
@@ -132,11 +150,12 @@ function addNote(req, res) {
  * times if the db connection is not open.
  */
 function getAllNotes(req, res, attempts) {
+	var query = {'deleted':false, 'createdby':getUsername(req)};
+	console.log('  get all notes created by ' + query.createdby);
 	if (isConnected) {
-		Note.find({'deleted':false}, function(err, notes) {
+		Note.find( query, function(err, notes) {
 			if(!err) {
 				console.log('Retrieved ' + notes.length + ' notes from mongo');
-				console.log(notes);
 				res.send(notes);
 			} else {
 				res.status(501);
@@ -192,7 +211,7 @@ app.post('/login', function(req, res){
  * GET '/logout'
  * 
  */
-app.get('/logout', function(req, res){
+app.post('/logout', function(req, res){
 	console.log('logout');
 	res.clearCookie(COOKIE_NAME);
 	res.send('logged out');	
