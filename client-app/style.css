@@ -9,10 +9,10 @@ body {
 
 /* color scheme */
 body               {background:#ffffff;}
-header,footer      {background:#ff0000;color:#FFFFFF;}
+header,footer      {background:#dd1111;color:#FFFFFF;}
 h1.note-heading    {background:#ff6666;color:#FFFFFF;}
 input.button       {background:#990000;color:#FFFFFF;}
-input.button:hover {background:#FFDD73;color:#A67E00;}
+body.not-mobile input.button:hover {background:#ff6666;color:#FFFFFF;}
 
 header {
 	position:relative;
@@ -81,7 +81,7 @@ section.note-body {
 	margin:0;
 	padding:5px 15px 5px 15px;
 }
-section.inactive-note {
+article.inactive-note > section.note-body {
 	display:none;
 	padding:0;
 	height:0;
@@ -90,13 +90,19 @@ section.inactive-note {
 
 /* styles for content of notes */
 
+section.note-body { text-align:left; }
 section.note-body h1 { font-size:2.00em;font-weight:normal; }
 section.note-body h2 { font-size:1.75em;font-weight:normal; }
 section.note-body h3 { font-size:1.50em;font-weight:normal; }
 section.note-body h4 { font-size:1.25em;font-weight:normal; }
 section.note-body h5 { font-size:1.00em;font-weight:bold;  }
 section.note-body h6 { font-size:1.00em;font-weight:bold; }
-pre { border:1px solid #EEE; padding:5px; }
+pre { 
+	border:1px solid #CCC; 
+	padding:5px;
+	overflow:auto;
+	-webkit-overflow-scrolling:touch; 
+}
 
 /* edit note view */
 
@@ -134,5 +140,38 @@ div.textarea > textarea {
 	resize:none;
 }
 
+@media screen and (min-width:800px) {
+	section#notes {
+	}
+	article.note {
+		margin: 0.50%;
+		display:inline-block;
+		vertical-align:middle;
+		width:99%;
+	}
+	article.inactive-note {
+		width:49%;
+	}
+	article.note > h1 {
+		height:2em;
+		border-radius:5px;
+	}
+	article.note input.edit {
+		float:right;
+		margin-left:5px;
+		margin-bottom:5px;
+	}
+	section.note-body {
+		margin:0;
+		padding:5px 15px 5px 15px;
+	}
+	article.inactive-note > section.note-body {
+		display:none;
+		padding:0;
+		height:0;
+		margin:0;
+	}
 
+
+}
 
