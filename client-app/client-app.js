@@ -3,6 +3,16 @@
  *
  */
 function main() {
+	
+	/*
+	 * This app is mobile-first.
+	 * If not touch screen, trigger
+	 * desktop enhancements by adding
+	 * class to the body
+	 */
+	if ( !('ontouchstart' in window) ) {
+		$('body').addClass('not-mobile');
+	}
 
 	/*
 	 * configure markdown parser
@@ -61,7 +71,7 @@ function main() {
 	 */
 	var NoteView = Backbone.View.extend({
 		tagName: 'article',
-		className: 'note',
+		className: 'note inactive-note',
 		template: _.template( $('#note-template').html() ),
 		initialize: function(options) {
 			/*
@@ -78,7 +88,7 @@ function main() {
 			event.stopPropagation();
 			event.preventDefault();
 			console.log('set active');
-			$('section.note-body', this.$el).toggleClass('inactive-note');
+			$(this.$el).toggleClass('inactive-note');
 		},
 		deleteNote: function(event) {
 			event.stopPropagation();
@@ -95,10 +105,14 @@ function main() {
 			$('body').append(editView.render().$el);
 		},
 		render: function() {
-			var name = this.model.getName();
-			var bodyHTML = jQuery.parseHTML(this.model.getBodyHTML());
-			this.$el.html(this.template({'name':name}));
-			$('.note-body', this.$el).first().append(bodyHTML);
+			if ( this.model.getDeleted() ) {
+				this.remove();
+			} else {
+				var name = this.model.getName();
+				var bodyHTML = jQuery.parseHTML(this.model.getBodyHTML());
+				this.$el.html(this.template({'name':name}));
+				$('.note-body', this.$el).first().append(bodyHTML);
+			}
 			return this; 
 		}
 	});
