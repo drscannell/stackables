@@ -173,6 +173,29 @@ function getAllNotes(req, res, attempts) {
 	}
 }
 
+function getNote(req, res, attempts) {
+	var id = req.query.id;
+	console.log('  get note where _id = ' + id);
+	if (isConnected) {
+		Note.findById( id, function(err, note) {
+			if(!err) {
+				console.log('Retrieved successfully!');
+				res.send(note);
+			} else {
+				res.status(501);
+				res.send({'error':'Failed to retrieve data from database.'});
+			}
+		});
+	} else if (attempts <= 5) {
+		console.log('Attempt ' + attempts + ' to retrieve notes failed.');
+		attempts++;
+		setTimeout(function(){getNote(req, res, attempts);},500);
+	} else {
+		console.log('Too many failed attempts to retrieve notes. Sending error.');
+		res.status(500);
+		res.send({'error':'Failed to connect to database.'});
+	}
+}
 /* --- login endpoints --- */
 
 /*
@@ -220,6 +243,9 @@ app.post('/logout', function(req, res){
 
 app.get('/notes', function(req, res) {
 	getAllNotes(req, res, 1);
+});
+app.get('/note', function(req, res) {
+	getNote(req, res, 1);
 });
 
 app.post('/note', function(req, res){

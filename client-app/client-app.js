@@ -37,7 +37,7 @@ function main() {
 			'markdown':'[enter note text here]',
 			'deleted':false
 		},
-		url: '/note',
+		url: function(){return '/note?id=' + this.get('_id')},
 		getName: function() {
 			return this.get('name');
 		},
@@ -67,6 +67,17 @@ function main() {
 	});
 
 	/*
+	 * define note collection
+	 */
+	var NoteList = Backbone.Collection.extend({
+		model: Note,
+		url: '/notes',
+		initialize: function(models, options) {
+			this.fetch();
+		}
+	});
+
+	/*
 	 * define view for a note
 	 */
 	var NoteView = Backbone.View.extend({
@@ -88,6 +99,7 @@ function main() {
 			event.stopPropagation();
 			event.preventDefault();
 			console.log('set active');
+			this.model.fetch();
 			$(this.$el).toggleClass('inactive-note');
 		},
 		deleteNote: function(event) {
@@ -100,11 +112,13 @@ function main() {
 		editNote: function(event) {
 			event.stopPropagation();
 			console.log('edit note');
-			// invoke edit note view
+			// invoke edit note view after fetch
+			this.model.fetch();
 			var editView = new EditNoteView({'normalView':this, 'model':this.model});
 			$('body').append(editView.render().$el);
 		},
 		render: function() {
+			console.log('render');
 			if ( this.model.getDeleted() ) {
 				this.remove();
 			} else {
@@ -124,6 +138,12 @@ function main() {
 		tagName: 'div',
 		className: 'edit-note-pane',
 		template: _.template( $('#edit-note-template').html() ),
+		initialize: function(options) {
+			/*
+			 * re-render when model changes
+			 */
+			this.listenTo(this.model, 'change', this.render);
+		},
 		events: {
 			'click input.delete': 'deleteNote',
 			'click input.close': 'saveAndCloseNote'
@@ -152,17 +172,6 @@ function main() {
 			var markdown = this.model.getMarkdown();
 			this.$el.html(this.template({'name':name, 'markdown':markdown}));
 			return this; 
-		}
-	});
-
-	/*
-	 * define note collection
-	 */
-	var NoteList = Backbone.Collection.extend({
-		model: Note,
-		url: '/notes',
-		initialize: function(models, options) {
-			this.fetch();
 		}
 	});
 
