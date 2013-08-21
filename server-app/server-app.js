@@ -10,7 +10,7 @@ app.use(express.bodyParser());
 app.use(express.cookieParser('321!!'));
 app.use(function(req,res,next){
 	console.log('\n' + req.method + ' ' + req.url);
-	console.log('  username: ' + getUsername(req) );
+	console.log('  username: ' + getUserId(req) );
 	next();
 });
 
@@ -45,9 +45,16 @@ app.use(function(req,res,next){
 });
 function isLoggedInAsAdmin(req) { return (req.signedCookies[COOKIE_NAME] == 'admin'); }
 function isLoggedInAsUser(req) { return (req.signedCookies[COOKIE_NAME]); }
-function getUsername(req) { 
+function getUserId(req) { 
 	try {
 		return req.signedCookies[COOKIE_NAME]; 
+	} catch(ex) {
+		return null;
+	}
+}
+function getUserObjectId(req) {
+	try {
+		return new mongoose.Types.ObjectId( getUserId(req) );
 	} catch(ex) {
 		return null;
 	}
@@ -92,10 +99,30 @@ db.once('open', function(){
 var noteSchema = mongoose.Schema({
 	'name': String,
 	'markdown': String,
-	'createdby': String,
+	'createdby': mongoose.Schema.Types.ObjectId,
 	'deleted': Boolean
-});
+}, {'collection':'notes'});
 var Note = mongoose.model('Note', noteSchema);
+
+var userSchema = mongoose.Schema({
+	'username': String,
+	'password': String,
+	'email': String
+}, {'collection':'users'});
+var User = mongoose.model('User', userSchema);
+
+/*
+ * get user
+ */
+function getUser(query, callback) {
+	User.findOne( query, function(err, user) {
+		if(!err && user != null) {
+			callback(null, user);
+		} else {
+			callback('Failed to retrieve user from database.', null);
+		}
+	});
+}
 
 /*
  * Update a single note
@@ -107,14 +134,14 @@ function updateNote(req, res) {
 	 * if empty, fill out createdby
 	 */
 	if( !('createdby' in req.body) ) {
-		req.body.createdby = getUsername(req);
+		req.body.createdby = getUserObjectId(req);
 	}
 	console.log('  name: ' + req.body.name);
 	console.log('  createdby: ' + req.body.createdby);
 	console.log('  deleted: ' + req.body.deleted);
 	Note.findByIdAndUpdate(noteId, req.body, function(err, doc) {
 		if (!err) {
-			console.log('successfully updated');
+			console.log('  successfully updated');
 			res.send(200);
 		} else {
 			console.log(err);
@@ -127,13 +154,13 @@ function updateNote(req, res) {
  * Add a single note
  */
 function addNote(req, res) {
-	req.body.createdby = getUsername(req);
+	req.body.createdby = getUserObjectId(req);
 	console.log('  name: ' + req.body.name);
 	console.log('  createdby: ' + req.body.createdby);
 	var newNote = new Note(req.body);
 	newNote.save(function(err, note) {
 		if (!err) {
-			console.log('successfully updated');
+			console.log('  successfully updated');
 			console.log(note);
 			res.status(200);
 			res.send(note);
@@ -150,12 +177,12 @@ function addNote(req, res) {
  * times if the db connection is not open.
  */
 function getAllNotes(req, res, attempts) {
-	var query = {'deleted':false, 'createdby':getUsername(req)};
+	var query = {'deleted':false, 'createdby':getUserObjectId(req)};
 	console.log('  get all notes created by ' + query.createdby);
 	if (isConnected) {
 		Note.find( query, function(err, notes) {
 			if(!err) {
-				console.log('Retrieved ' + notes.length + ' notes from mongo');
+				console.log('  Retrieved ' + notes.length + ' notes from mongo');
 				res.send(notes);
 			} else {
 				res.status(501);
@@ -163,11 +190,11 @@ function getAllNotes(req, res, attempts) {
 			}
 		});
 	} else if (attempts <= 5) {
-		console.log('Attempt ' + attempts + ' to retrieve notes failed.');
+		console.log('  Attempt ' + attempts + ' to retrieve notes failed.');
 		attempts++;
 		setTimeout(function(){getAllNotes(req, res, attempts);},500);
 	} else {
-		console.log('Too many failed attempts to retrieve notes. Sending error.');
+		console.log('  Too many failed attempts to retrieve notes. Sending error.');
 		res.status(500);
 		res.send({'error':'Failed to connect to database.'});
 	}
@@ -179,7 +206,7 @@ function getNote(req, res, attempts) {
 	if (isConnected) {
 		Note.findById( id, function(err, note) {
 			if(!err) {
-				console.log('Retrieved successfully!');
+				console.log('  Retrieved successfully!');
 				res.send(note);
 			} else {
 				res.status(501);
@@ -187,11 +214,11 @@ function getNote(req, res, attempts) {
 			}
 		});
 	} else if (attempts <= 5) {
-		console.log('Attempt ' + attempts + ' to retrieve notes failed.');
+		console.log('  Attempt ' + attempts + ' to retrieve notes failed.');
 		attempts++;
 		setTimeout(function(){getNote(req, res, attempts);},500);
 	} else {
-		console.log('Too many failed attempts to retrieve notes. Sending error.');
+		console.log('  Too many failed attempts to retrieve notes. Sending error.');
 		res.status(500);
 		res.send({'error':'Failed to connect to database.'});
 	}
@@ -212,6 +239,24 @@ app.post('/login', function(req, res){
 	console.log('login attempt');
 	console.log('  name: ' + req.body.name);
 	console.log('  pass: ' + req.body.password);
+	var query = {'username':req.body.name};
+	getUser(query, function(err, user) {
+		if (!err) {
+			if ( !('password' in user) ) {
+				res.status(500).send({'error':'database error. no password on file'});
+			} else if ( user.password == req.body.password ) {
+				console.log('  logged in as ' + req.body.name + '(' + user._id + ')');
+				res.cookie(COOKIE_NAME, user._id, { signed:true, maxAge:PASSWORD_MAXAGE });
+				res.send({'success':'credentials accepted'});
+			} else {
+				res.status(401).send({'error':'wrong password'});
+			}
+		} else {
+			res.status(401).send({'error':'nonexistent username'});
+		}
+	});
+
+	/*
 	var i = 0;
 	var match = null;
 	while ( i < credentials.length && match == null ) {
@@ -228,7 +273,7 @@ app.post('/login', function(req, res){
 	} else {
 		console.log('wrong password');
 		res.status(401).send({'error':'wrong password'});
-	}
+	}*/
 });
 /*
  * GET '/logout'
