@@ -113,7 +113,9 @@ function main() {
 			event.stopPropagation();
 			console.log('edit note');
 			// invoke edit note view after fetch
-			this.model.fetch();
+			if ( this.model.get('_id') ) {
+				this.model.fetch();
+			}
 			var editView = new EditNoteView({'normalView':this, 'model':this.model});
 			$('body').append(editView.render().$el);
 		},
