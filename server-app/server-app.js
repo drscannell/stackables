@@ -255,25 +255,6 @@ app.post('/login', function(req, res){
 			res.status(401).send({'error':'nonexistent username'});
 		}
 	});
-
-	/*
-	var i = 0;
-	var match = null;
-	while ( i < credentials.length && match == null ) {
-		if ( req.body.name === credentials[i].username ) match = credentials[i];
-		i++;
-	}
-	if ( !match ) {
-		console.log('nonexistent username');
-		res.status(401).send({'error':'nonexistent username'});
-	} else if ( req.body.password === match.password ) {
-		console.log('  logged in as ' + req.body.name);
-		res.cookie(COOKIE_NAME, req.body.name, { signed: true, maxAge:PASSWORD_MAXAGE });
-		res.send({'success':'credentials accepted'});
-	} else {
-		console.log('wrong password');
-		res.status(401).send({'error':'wrong password'});
-	}*/
 });
 /*
  * GET '/logout'
@@ -302,15 +283,16 @@ app.post('/note', function(req, res){
 });
 
 
-app.get('/testnotes', function(req, res) {
-	var testData = [
-		{'name':'Note 1', 'markdown':'Text of note 1'},
-		{'name':'Note 2', 'markdown':'Text of note 2'},
-		{'name':'Note 3', 'markdown':'Text of note 3'},
-		{'name':'Note 4', 'markdown':'Text of note 4'},
-		{'name':'Note 5', 'markdown':'Text of note 5'}
-	];
-	res.send(testData);
+app.get('/user', function(req, res) {
+	var id = getUserId(req);
+	User.findById( id, {'username':true, 'email':true, 'colorScheme':true}, function(err, user) {
+		if(!err && user != null) {
+			console.log('  Retrieved user successfully!');
+			res.send(user);
+		} else {
+			res.status(501).send({'error':'Failed to retrieve data from database.'});
+		}
+	});
 });
 
 /* --- file endpoints --- */

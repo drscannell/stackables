@@ -65,6 +65,19 @@ function main() {
 			this.set('deleted', newDeleted);
 		}
 	});
+	
+	/*
+	 * define model for user
+	 */
+	var User = Backbone.Model.extend({
+		url: '/user',
+		getUsername: function() {
+			this.get('username');
+		},
+		getEmail: function() {
+			this.get('email');
+		}
+	});
 
 	/*
 	 * define note collection
@@ -183,12 +196,14 @@ function main() {
 	var AppView = Backbone.View.extend({
 		el: $('#app'),
 		initialize: function(options) {
+			this.userModel = new User();
 			this.collectionToMonitor = options.collectionToMonitor;
 			this.listenTo(this.collectionToMonitor, 'add', this.addNoteView);
 		},
 		events: {
 			'click input.add': 'addNewNote',
-			'click input.logout': 'logout'
+			'click input.logout': 'logout',
+			'click input.settings': 'showSettingsView'
 		},
 		addNewNote: function() {
 			var note = new Note();
@@ -199,6 +214,10 @@ function main() {
 		addNoteView: function(note) {
 			var view = new NoteView({'model':note});
 			$('#notes').prepend(view.render().$el);
+		},
+		showSettingsView: function(){
+			//TODO: create view and render
+			console.log('username: ' + this.userModel.getUsername() );
 		},
 		logout: function() {
 			jQuery.post('logout', function(data) {
@@ -213,6 +232,7 @@ function main() {
 	/*
 	 * instantiate
 	 */
+	var user = new User().fetch();
 	var notes = new NoteList();
 	var app = new AppView({'collectionToMonitor':notes});
 }
