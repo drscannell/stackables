@@ -107,7 +107,12 @@ var Note = mongoose.model('Note', noteSchema);
 var userSchema = mongoose.Schema({
 	'username': String,
 	'password': String,
-	'email': String
+	'email': String,
+	'colorScheme':{
+		'appColor': String,
+		'noteColor': String,
+		'buttonColor': String
+	}
 }, {'collection':'users'});
 var User = mongoose.model('User', userSchema);
 
@@ -151,6 +156,26 @@ function updateNote(req, res) {
 }
 
 /*
+ * Update a single user
+ */
+function updateUser(req, res) {
+	var id = req.body._id;
+	delete req.body._id;
+	console.log('  username: ' + req.body.username);
+	console.log('  email: ' + req.body.email);
+	console.log('  colorScheme: ' + req.body.colorScheme);
+	User.findByIdAndUpdate(id, req.body, function(err, doc) {
+		if (!err) {
+			console.log('  successfully updated user');
+			res.send(200);
+		} else {
+			console.log(err);
+			res.send(500);
+		}
+	});
+}
+
+/*
  * Add a single note
  */
 function addNote(req, res) {
@@ -160,8 +185,7 @@ function addNote(req, res) {
 	var newNote = new Note(req.body);
 	newNote.save(function(err, note) {
 		if (!err) {
-			console.log('  successfully updated');
-			console.log(note);
+			console.log('  successfully added note');
 			res.status(200);
 			res.send(note);
 		} else {
@@ -282,6 +306,13 @@ app.post('/note', function(req, res){
 	}
 });
 
+app.post('/user', function(req, res){
+	if ( '_id' in req.body ) {
+		updateUser(req, res);
+	} else {
+		console.log('no _id for user!');
+	} 
+});
 
 app.get('/user', function(req, res) {
 	var id = getUserId(req);
@@ -294,6 +325,8 @@ app.get('/user', function(req, res) {
 		}
 	});
 });
+
+
 
 /* --- file endpoints --- */
 

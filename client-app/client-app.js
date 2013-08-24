@@ -46,7 +46,7 @@ function main() {
 		},
 		getBodyHTML: function() {
 			try {
-				var htmlText =  marked( this.get('markdown') );
+				var htmlText =  marked(this.getMarkdown());
 				return htmlText;
 			} catch (ex) {
 				return 'Markdown parser error: ' + ex
@@ -72,10 +72,75 @@ function main() {
 	var User = Backbone.Model.extend({
 		url: '/user',
 		getUsername: function() {
-			this.get('username');
+			return this.get('username');
+		},
+		setUsername: function(username) {
+			this.set('username', username);
 		},
 		getEmail: function() {
-			this.get('email');
+			return this.get('email');
+		},
+		setEmail: function(email) {
+			this.set('email',email);
+		},
+		getColorScheme: function() {
+			var defaultColorScheme = {
+				'appColor':'#33cccc',
+				'noteColor':'#66cc66',
+				'buttonColor':'#336666'
+			};
+			var colorScheme =  this.get('colorScheme') || defaultColorScheme;
+			return $.extend(true,{},colorScheme);
+		},
+		setColorScheme: function(colorScheme) {
+			this.set('colorScheme', colorScheme);
+		}
+	});
+
+	/*
+	 * define edit view for user
+	 */
+	var EditUserView = Backbone.View.extend({
+		tagName: 'div',
+		className: 'edit-user-pane',
+		template: _.template( $('#edit-user-template').html() ),
+		initialize: function(options) {
+			/*
+			 * re-render when model changes
+			 */
+			//this.listenTo(this.model, 'change', this.render);
+		},
+		events: {
+			'click input.close': 'saveAndClose'
+		},
+		saveAndClose: function(event) {
+			event.stopPropagation();
+			console.log('save and close user');
+			var email = $('.edit-email', this.$el).first().val();
+			this.model.setEmail(email);
+			var appColor = $('.edit-app-color', this.$el).first().val();
+			var noteColor = $('.edit-note-color', this.$el).first().val();
+			var buttonColor = $('.edit-button-color', this.$el).first().val();
+			this.model.setColorScheme({
+				'appColor': appColor,
+				'noteColor': noteColor,
+				'buttonColor': buttonColor
+			});
+			this.model.save();
+			this.remove();
+		},
+		render: function() {
+			var username = this.model.getUsername();
+			var email = this.model.getEmail();
+			var colorScheme = this.model.getColorScheme();
+			this.$el.html(this.template({
+				'username':username, 
+				'email':email,
+				'appColor': colorScheme.appColor,
+				'noteColor': colorScheme.noteColor,
+				'buttonColor': colorScheme.buttonColor
+			}));
+			return this; 
 		}
 	});
 
@@ -111,7 +176,6 @@ function main() {
 		toggleActive: function(event) {
 			event.stopPropagation();
 			event.preventDefault();
-			console.log('set active');
 			this.model.fetch();
 			$(this.$el).toggleClass('inactive-note');
 		},
@@ -133,7 +197,6 @@ function main() {
 			$('body').append(editView.render().$el);
 		},
 		render: function() {
-			console.log('render');
 			if ( this.model.getDeleted() ) {
 				this.remove();
 			} else {
@@ -168,7 +231,6 @@ function main() {
 			console.log('delete note');
 			this.model.setDeleted(true);
 			this.model.save();
-			//this.options.normalView.remove();
 			this.remove();
 		},
 		saveAndCloseNote: function(event) {
@@ -179,7 +241,6 @@ function main() {
 			this.model.setName(name);
 			this.model.setMarkdown(markdown);
 			this.model.save();
-			//this.options.normalView.render();
 			this.remove();
 		},
 		render: function() {
@@ -197,8 +258,10 @@ function main() {
 		el: $('#app'),
 		initialize: function(options) {
 			this.userModel = new User();
+			this.userModel.fetch();
 			this.collectionToMonitor = options.collectionToMonitor;
 			this.listenTo(this.collectionToMonitor, 'add', this.addNoteView);
+			this.listenTo(this.userModel, 'change', this.userChange);
 		},
 		events: {
 			'click input.add': 'addNewNote',
@@ -216,8 +279,34 @@ function main() {
 			$('#notes').prepend(view.render().$el);
 		},
 		showSettingsView: function(){
-			//TODO: create view and render
 			console.log('username: ' + this.userModel.getUsername() );
+			var editView = new EditUserView({'model':this.userModel});
+			$('body').append(editView.render().$el);
+				
+		},
+		userChange: function() {
+			console.log('userChange');
+			var colorScheme = this.userModel.getColorScheme();
+			this.updateColorScheme(colorScheme);
+		},
+		updateColorScheme: function(colorScheme) {
+			$('header, footer').css('background',colorScheme.appColor);
+			$('h1.note-heading').css('background', colorScheme.noteColor);
+			$('body.not-mobile h1.note-heading').hover(
+				function(){
+					$(this).css('background', colorScheme.buttonColor);
+				},
+				function(){
+					$(this).css('background', colorScheme.noteColor);
+				});
+			$('input.button').css('background', colorScheme.buttonColor);
+			$('body.not-mobile input.button').hover(
+				function(){
+					$(this).css('background', colorScheme.noteColor);
+				},
+				function(){
+					$(this).css('background', colorScheme.buttonColor);
+				});
 		},
 		logout: function() {
 			jQuery.post('logout', function(data) {
@@ -232,7 +321,6 @@ function main() {
 	/*
 	 * instantiate
 	 */
-	var user = new User().fetch();
 	var notes = new NoteList();
 	var app = new AppView({'collectionToMonitor':notes});
 }
