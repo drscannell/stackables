@@ -7,14 +7,6 @@ body {
 	font-family:sans-serif;
 }
 
-/* color scheme */
-body               {background:#ffffff;}
-header,footer      {background:#33cccc;color:#FFFFFF;}
-h1.note-heading    {background:#66cc66;color:#FFFFFF;}
-body.not-mobile h1.note-heading:hover {background:#336666;color:#FFFFFF;}
-input.button       {background:#336666;color:#FFFFFF;}
-body.not-mobile input.button:hover {background:#66cc66;color:#FFFFFF;}
-
 div#app {
 	text-align:center;
 }
@@ -49,7 +41,7 @@ footer {
 input.button {
 	border:1px #000;
 	border-radius:5px;
-	width:75px;
+	min-width:50px;
 	height:50px;
 	vertical-align:middle;
 	-webkit-appearance: none;
@@ -170,6 +162,9 @@ form.edit-user-form > h2 {
 	text-align:center;
 	font-size:1.2em;
 	margin:10px;
+}
+.errors {
+	color:red;
 }
 input.text {
 	width:20em;
