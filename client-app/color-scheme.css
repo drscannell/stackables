@@ -1,0 +1,9 @@
+
+/* color scheme */
+body               {background:#ffffff;}
+header,footer      {background:$appColor;color:#FFFFFF;}
+h1.note-heading    {background:$noteColor;color:#FFFFFF;}
+body.not-mobile h1.note-heading:hover {background:$buttonColor;color:#FFFFFF;}
+input.button       {background:$buttonColor;color:#FFFFFF;}
+body.not-mobile input.button:hover {background:$noteColor;color:#FFFFFF;}
+

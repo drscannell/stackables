@@ -4,6 +4,7 @@
  * Launch the app & establish middleware
  */
 var express = require('express');
+var fs = require('fs');
 var app = express();
 app.listen(process.env.PORT || 8000);
 app.use(express.bodyParser());
@@ -46,6 +47,7 @@ app.use(function(req,res,next){
 function isLoggedInAsAdmin(req) { return (req.signedCookies[COOKIE_NAME] == 'admin'); }
 function isLoggedInAsUser(req) { return (req.signedCookies[COOKIE_NAME]); }
 function getUserId(req) { 
+	if (!req) throw Error('getUserId(req) requires non-null argument');
 	try {
 		return req.signedCookies[COOKIE_NAME]; 
 	} catch(ex) {
@@ -107,7 +109,12 @@ var Note = mongoose.model('Note', noteSchema);
 var userSchema = mongoose.Schema({
 	'username': String,
 	'password': String,
-	'email': String
+	'email': String,
+	'colorScheme':{
+		'appColor': String,
+		'noteColor': String,
+		'buttonColor': String
+	}
 }, {'collection':'users'});
 var User = mongoose.model('User', userSchema);
 
@@ -122,6 +129,122 @@ function getUser(query, callback) {
 			callback('Failed to retrieve user from database.', null);
 		}
 	});
+}
+
+/*
+ * build CSS file customized for
+ * user based on color scheme settings
+ */
+function getCustomizedCss(userId, callback) {
+	/*
+	 * get user data from which
+	 * to customize css
+	 */
+	console.log('  Checking db for user with id=' + userId);
+	User.findById(userId, {'colorScheme':true}, function(err, user) {
+		if (!err && user != null) {
+			console.log('  got user data to build css from');
+			console.log(user);
+			/*
+			 * get the final css data
+			 */
+			buildFinalCss(user.colorScheme, function(err, finalCss) {
+				if(!err) {
+					console.log('  Successfully created custom css');
+					callback(null, finalCss);
+				} else {
+					console.log('  Failed to get custom css: ' + err);
+					callback({'error':err}, null);
+				}
+			});
+		} else {
+			console.log('  getCustomizedCss.error: ' + err);
+			callback({'error':'Failed to get user data'}, null);
+		}
+	});
+}
+
+/*
+ * - get base css
+ * - get color scheme template, modify
+ *   with user values
+ * - combine and deliver
+ */
+function buildFinalCss(colorSchemeObject, callback) {
+	var colorScheme = getSafeColorScheme(colorSchemeObject);
+	/*
+	 * read base css from file
+	 */
+	fs.readFile('client-app/style.css', function(err, baseCss) {
+		if (!err) {
+			/*
+			 * read color scheme template from file
+			 */
+			fs.readFile('client-app/color-scheme.css', function(err, template) {
+				if (!err) {
+					/*
+					 * simple regex templating
+					 */
+					var colorSchemeCss = template.toString();
+					colorSchemeCss = colorSchemeCss
+						.replace(/\$appColor/g, colorScheme.appColor)
+						.replace(/\$noteColor/g, colorScheme.noteColor)
+						.replace(/\$buttonColor/g, colorScheme.buttonColor);
+					var finalCss = baseCss + colorSchemeCss;
+					callback(null, finalCss);
+				} else {
+					console.log('  error reading css color scheme template');
+					callback({'error':'Failed to generate color scheme CSS'}, null);
+				}
+			});
+		} else {
+			console.log('  error reading base css: ' + err);
+			callback({'error':'Failed to read base css'}, null);
+		}
+	});
+}
+
+/*
+ * validate fields in color scheme
+ * object before inserting into CSS
+ */
+function getSafeColorScheme(colorSchemeObject) {
+	/*
+	 * default values to use if any
+	 * are invalid
+	 */
+	var defaultColorScheme = {
+		'appColor':'#33cccc',
+		'noteColor':'#66cc66',
+		'buttonColor':'#336666'
+	};
+	if ( !colorSchemeObject) {
+		return defaultColorScheme;
+	}
+	if (!('appColor' in colorSchemeObject) || !isValidColorCode(colorSchemeObject.appColor)) {
+		colorSchemeObject.appColor = defaultColorScheme.appColor;
+	}
+	if (!('noteColor' in colorSchemeObject) || !isValidColorCode(colorSchemeObject.noteColor)) {
+		colorSchemeObject.noteColor = defaultColorScheme.noteColor;
+	}
+	if (!('buttonColor' in colorSchemeObject) || !isValidColorCode(colorSchemeObject.buttonColor)) {
+		colorSchemeObject.buttonColor = defaultColorScheme.buttonColor;
+	}
+	return colorSchemeObject;
+}
+
+/*
+ * basic regex check allowing
+ * for three or six digit hex
+ * codes
+ */
+function isValidColorCode(string) {
+	try {
+		return string.match(/^#([0-9abcdef]{6}|[0-9abcdef]{3})$/);
+	} catch(ex) {
+		console.log(ex);
+		return false;
+	}
 }
 
 /*
@@ -151,6 +274,26 @@ function updateNote(req, res) {
 }
 
 /*
+ * Update a single user
+ */
+function updateUser(req, res) {
+	var id = req.body._id;
+	delete req.body._id;
+	console.log('  username: ' + req.body.username);
+	console.log('  email: ' + req.body.email);
+	console.log('  colorScheme: ' + req.body.colorScheme);
+	User.findByIdAndUpdate(id, req.body, function(err, doc) {
+		if (!err) {
+			console.log('  successfully updated user');
+			res.send(200);
+		} else {
+			console.log(err);
+			res.send(500);
+		}
+	});
+}
+
+/*
  * Add a single note
  */
 function addNote(req, res) {
@@ -160,8 +303,7 @@ function addNote(req, res) {
 	var newNote = new Note(req.body);
 	newNote.save(function(err, note) {
 		if (!err) {
-			console.log('  successfully updated');
-			console.log(note);
+			console.log('  successfully added note');
 			res.status(200);
 			res.send(note);
 		} else {
@@ -255,25 +397,6 @@ app.post('/login', function(req, res){
 			res.status(401).send({'error':'nonexistent username'});
 		}
 	});
-
-	/*
-	var i = 0;
-	var match = null;
-	while ( i < credentials.length && match == null ) {
-		if ( req.body.name === credentials[i].username ) match = credentials[i];
-		i++;
-	}
-	if ( !match ) {
-		console.log('nonexistent username');
-		res.status(401).send({'error':'nonexistent username'});
-	} else if ( req.body.password === match.password ) {
-		console.log('  logged in as ' + req.body.name);
-		res.cookie(COOKIE_NAME, req.body.name, { signed: true, maxAge:PASSWORD_MAXAGE });
-		res.send({'success':'credentials accepted'});
-	} else {
-		console.log('wrong password');
-		res.status(401).send({'error':'wrong password'});
-	}*/
 });
 /*
  * GET '/logout'
@@ -301,22 +424,41 @@ app.post('/note', function(req, res){
 	}
 });
 
-
-app.get('/testnotes', function(req, res) {
-	var testData = [
-		{'name':'Note 1', 'markdown':'Text of note 1'},
-		{'name':'Note 2', 'markdown':'Text of note 2'},
-		{'name':'Note 3', 'markdown':'Text of note 3'},
-		{'name':'Note 4', 'markdown':'Text of note 4'},
-		{'name':'Note 5', 'markdown':'Text of note 5'}
-	];
-	res.send(testData);
+app.post('/user', function(req, res){
+	if ( '_id' in req.body ) {
+		updateUser(req, res);
+	} else {
+		console.log('no _id for user!');
+	} 
 });
+
+app.get('/user', function(req, res) {
+	var id = getUserId(req);
+	User.findById( id, {'username':true, 'email':true, 'colorScheme':true}, function(err, user) {
+		if(!err && user != null) {
+			console.log('  Retrieved user successfully!');
+			res.send(user);
+		} else {
+			res.status(501).send({'error':'Failed to retrieve data from database.'});
+		}
+	});
+});
+
+
 
 /* --- file endpoints --- */
 
 app.get('/', function(req, res) {
 	res.sendfile('client-app/index.html');
+});
+app.get('/style.css', function(req, res) {
+	getCustomizedCss(getUserId(req), function(err, data) {
+		if (!err) {
+			res.status(200).set('Content-Type', 'text/css').send(data);
+		} else {
+			res.status(500).send({'error':'Failed to get custom CSS'});
+		}
+	});
 });
 app.use(express.directory('client-app'));
 app.use(express.static('client-app'));
