@@ -9,10 +9,15 @@ body {
 
 /* color scheme */
 body               {background:#ffffff;}
-header,footer      {background:#dd1111;color:#FFFFFF;}
-h1.note-heading    {background:#ff6666;color:#FFFFFF;}
-input.button       {background:#990000;color:#FFFFFF;}
-body.not-mobile input.button:hover {background:#ff6666;color:#FFFFFF;}
+header,footer      {background:#33cccc;color:#FFFFFF;}
+h1.note-heading    {background:#66cc66;color:#FFFFFF;}
+body.not-mobile h1.note-heading:hover {background:#336666;color:#FFFFFF;}
+input.button       {background:#336666;color:#FFFFFF;}
+body.not-mobile input.button:hover {background:#66cc66;color:#FFFFFF;}
+
+div#app {
+	text-align:center;
+}
 
 header {
 	position:relative;
@@ -140,21 +145,62 @@ div.textarea > textarea {
 	resize:none;
 }
 
+/* edit user view */
+
+div.edit-user-pane {
+	z-index: 10;
+	position:fixed;
+	top:0px;
+	left:0px;
+	right:0px;
+	bottom:0px;
+	background:#fff;
+	text-align:center;
+}
+div.edit-user-buttons {
+	text-align:center;
+	margin: 0 0 10px 0;
+	padding: 10px;
+}
+form.edit-user-form {
+	display:inline-block;
+	text-align:right;
+}
+form.edit-user-form > h2 {
+	text-align:center;
+	font-size:1.2em;
+	margin:10px;
+}
+input.text {
+	width:20em;
+	padding:5px;
+}
+
 @media screen and (min-width:800px) {
 	section#notes {
+		text-align:left;
 	}
 	article.note {
-		margin: 0.50%;
+		margin: 1px;
 		display:inline-block;
 		vertical-align:middle;
+		text-align:left;
 		width:99%;
 	}
 	article.inactive-note {
 		width:49%;
+		width:33%;
 	}
 	article.note > h1 {
-		height:2em;
+		height:3em;
+		font-size:1em;
 		border-radius:5px;
+		line-height:3em;
+	}
+	article.note > h1 > span {
+		display:inline-block;
+		line-height:1.2em;
+		vertical-align:middle;
 	}
 	article.note input.edit {
 		float:right;
