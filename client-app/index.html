@@ -7,17 +7,24 @@
 		<link rel="stylesheet" href="style.css" />
     </head>
     <body>
-		<div id="app">
-			<header>
-				<input type="button" class="button settings" value="settings" />
-				<input type="button" class="button logout" value="logout" />
-				<input type="button" class="button add" value="add" />
+		<div class="app" id="app">
+			<header class="app">
+				<h1 class="app-header">stackabl.es</h1>
+				<div class="button-input">
+					<input type="button" class="button logout" value="logout" />
+				</div>
+				<div class="button-input">
+					<input type="button" class="button settings" value="settings" />
+				</div>
+				<div class="button-input">
+					<input type="button" class="button add" value="add" />
+				</div>
 			</header>
-			<section id="notes">
+			<section class="notes" id="notes">
 				<!-- notes will be inserted here -->	
 			</section>
-			<footer>
-				 backbone.js | node.js | marked.js
+			<footer class="app">
+				 <h1 class="app-footer">backbone.js | node.js | marked.js</h1>
 			</footer>
 		</div>
 		<script src="json2.js"></script>
@@ -27,50 +34,68 @@
 		<script src="marked.js"></script>
 		<script src="client-app.js"></script>
 		<script type="text/template" id="note-template">
-			<h1 class="note-heading"><span><%- name %></span></h1>
+			<h1 class="note"><span><%- name %></span></h1>
 			<section class="note-body inactive-note">
-				<input type="button" class="button edit" value="edit" />
+				<div class="button-input">
+					<input type="button" class="button edit" value="edit" />
+				</div>
 			</section>
 		</script>
 		<script type="text/template" id="edit-note-template">
-			<header class="edit-note-buttons">
-				<input type="button" class="button delete" value="delete" />
-				<input type="button" class="button close" value="close" />
+			<header class="app">
+				<div class="button-input">
+					<input type="button" class="button delete" value="delete" />
+				</div>
+				<div class="button-input">
+					<input type="button" class="button close" value="save &amp; close" />
+				</div>
 			</header>
-			<input type="text" class="edit-name" value="<%- name %>" />
-			<div class="textarea">
-				<textarea class="edit-markdown"><%- markdown %></textarea>
-			</div>
+			<form class="form">
+				<div class="text-input">
+					<span class="text-input-label">name:</span>
+					<input type="text" class="text edit-name" size="50" value="<%- name %>" />
+				</div>
+				<div class="textarea">
+					<textarea class="textarea edit-markdown"><%- markdown %></textarea>
+				</div>
+			</form>
 		</script>
 		<script type="text/template" id="edit-user-template">
-			<header class="edit-user-buttons">
-				<input type="button" class="button default-colors" value="default colors" />
-				<input type="button" class="button close" value="save &amp; close" />
+			<header class="app">
+				<div class="button-input">
+					<input type="button" class="button close" value="save &amp; close" />
+				</div>
 			</header>
-			<form class="edit-user-form">
-				<h2>Account Details</h2>
-				<div>
-					<span class="input-label">username:</span>
-					<input type="text" class="text edit-username" value="<%- username %>" readonly />
-				</div>
-				<div>
-					<span class="input-label">email:</span>
-					<input type="text" class="text edit-email" value="<%- email %>" readonly />
-				</div>
-				<h2>Color Scheme</h2>	
-				<p><i>Changes take effect on next refresh.</i></p>
-				<div>
-					<span class="input-label">app color:</span>
-					<input type="text" class="text edit-app-color" value="<%- appColor %>" />
-				</div>
-				<div>
-					<span class="input-label">note color:</span>
-					<input type="text" class="text edit-note-color" value="<%- noteColor %>" />
-				</div>
-				<div>
-					<span class="input-label">button color:</span>
-					<input type="text" class="text edit-button-color" value="<%- buttonColor %>" />
-				</div>
+			<form class="form">
+				<section class="form">
+					<h2 class="form">Account Details</h2>
+					<div class="text-input">
+						<span class="text-input-label">username:</span>
+						<input type="text" class="text edit-username" size="30" value="<%- username %>" readonly />
+					</div>
+					<div class="text-input">
+						<span class="text-input-label">email:</span>
+						<input type="text" class="text edit-email" size="30" value="<%- email %>" readonly />
+					</div>
+				</section>
+				<section class="form">
+					<h2 class="form">Color Scheme</h2>	
+					<div class="text-input">
+						<span class="text-input-label">app color:</span>
+						<input type="text" class="text edit-app-color" size="30" value="<%- appColor %>" />
+					</div>
+					<div class="text-input">
+						<span class="text-input-label">note color:</span>
+						<input type="text" class="text edit-note-color" size="30" value="<%- noteColor %>" />
+					</div>
+					<div class="text-input">
+						<span class="text-input-label">button color:</span>
+						<input type="text" class="text edit-button-color" size="30" value="<%- buttonColor %>" />
+					</div>
+					<div class="button-input">
+						<input type="button" class="button default-colors" size="30" value="default colors" />
+					</div>
+				</section>
 				<div class="errors"></div>
 			</form>
 		</script>
