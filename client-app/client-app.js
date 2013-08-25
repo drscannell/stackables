@@ -73,19 +73,27 @@ function main() {
 		url: '/user',
 		validate: function(attrs, options) {
 			console.log('Validating User Attributes');
-			var errorMessage = [];
+			var errors = [];
 			if (!this.isValidColorCode(attrs.colorScheme.appColor)) {
-				errorMessage.push('Invalid app color code');
+				errors.push({
+					'message':'Invalid app color code',
+					'class':'appColor'
+				});
 			}
 			if (!this.isValidColorCode(attrs.colorScheme.noteColor)) {
-				errorMessage.push('Invalid note color code');
+				errors.push({
+					'message':'Invalid note color code',
+					'class':'noteColor'
+				});
 			}
 			if (!this.isValidColorCode(attrs.colorScheme.buttonColor)) {
-				errorMessage.push('Invalid button color code');
+				errors.push({
+					'message':'Invalid button color code',
+					'class':'buttonColor'
+				});
 			}
-			if (errorMessage.length > 0) {
-				console.log('Invalid fields!');
-				return errorMessage;
+			if (errors.length > 0) {
+				return errors;
 			}
 		},
 		isValidColorCode: function(string) {
@@ -144,9 +152,9 @@ function main() {
 			console.log('save and close user');
 			var email = $('.edit-email', this.$el).first().val();
 			this.model.setEmail(email);
-			var appColor = $('.edit-app-color', this.$el).first().val();
-			var noteColor = $('.edit-note-color', this.$el).first().val();
-			var buttonColor = $('.edit-button-color', this.$el).first().val();
+			var appColor = $('.appColor > input', this.$el).first().val();
+			var noteColor = $('.noteColor > input', this.$el).first().val();
+			var buttonColor = $('.buttonColor > input', this.$el).first().val();
 			this.model.setColorScheme({
 				'appColor': appColor,
 				'noteColor': noteColor,
@@ -160,17 +168,20 @@ function main() {
 		applyDefaultColorScheme: function() {
 			console.log('Applying default color scheme');
 			var defaults = this.model.getDefaultColorScheme();
-			$('.edit-app-color', this.$el).first().val(defaults.appColor);
-			$('.edit-note-color', this.$el).first().val(defaults.noteColor);
-			$('.edit-button-color', this.$el).first().val(defaults.buttonColor);
+			$('.appColor > input', this.$el).first().val(defaults.appColor);
+			$('.noteColor > input', this.$el).first().val(defaults.noteColor);
+			$('.buttonColor > input', this.$el).first().val(defaults.buttonColor);
+			$('.text-input', this.$el).removeClass('error').addClass('success');
 		},
-		reportValidationErrors: function(model) {
+		reportValidationErrors: function(model, errors) {
 			console.log('reportValidationErrors:');
-			$('div.errors', this.$el).empty();
-			for(i in model.validationError) {
-				console.log( model.validationError[i] );
-				$('div.errors', this.$el).append('<p></p>').append(model.validationError[i]);
-			}
+			$('.text-input', this.$el).removeClass('error').addClass('success');
+			_.each(errors, function(error, i) {
+				console.log(i);
+				var query = '.' + error.class;
+				console.log(query);
+				$(query, this.$el).addClass('error');
+			});
 		},
 		render: function() {
 			$('#app').hide();

@@ -10,14 +10,16 @@
 		<div class="app" id="app">
 			<header class="app">
 				<h1 class="app-header">stackabl.es</h1>
-				<div class="button-input">
-					<input type="button" class="button logout" value="logout" />
-				</div>
-				<div class="button-input">
-					<input type="button" class="button settings" value="settings" />
-				</div>
-				<div class="button-input">
-					<input type="button" class="button add" value="add" />
+				<div class="buttons">
+					<div class="button-input">
+						<input type="button" class="button logout" value="logout" />
+					</div>
+					<div class="button-input">
+						<input type="button" class="button settings" value="settings" />
+					</div>
+					<div class="button-input">
+						<input type="button" class="button add" value="add" />
+					</div>
 				</div>
 			</header>
 			<section class="notes" id="notes">
@@ -36,18 +38,22 @@
 		<script type="text/template" id="note-template">
 			<h1 class="note"><span><%- name %></span></h1>
 			<section class="note-body inactive-note">
-				<div class="button-input">
-					<input type="button" class="button edit" value="edit" />
+				<div class="buttons">
+					<div class="button-input">
+						<input type="button" class="button edit" value="edit" />
+					</div>
 				</div>
 			</section>
 		</script>
 		<script type="text/template" id="edit-note-template">
 			<header class="app">
-				<div class="button-input">
-					<input type="button" class="button delete" value="delete" />
-				</div>
-				<div class="button-input">
-					<input type="button" class="button close" value="save &amp; close" />
+				<div class="buttons">
+					<div class="button-input">
+						<input type="button" class="button delete" value="delete" />
+					</div>
+					<div class="button-input">
+						<input type="button" class="button close" value="save &amp; close" />
+					</div>
 				</div>
 			</header>
 			<form class="form">
@@ -80,23 +86,25 @@
 				</section>
 				<section class="form">
 					<h2 class="form">Color Scheme</h2>	
-					<div class="text-input">
+					<div class="text-input appColor">
 						<span class="text-input-label">app color:</span>
-						<input type="text" class="text edit-app-color" size="30" value="<%- appColor %>" />
+						<input type="text" class="text" size="30" value="<%- appColor %>" />
+						<span class="feedback"></span>
 					</div>
-					<div class="text-input">
+					<div class="text-input noteColor">
 						<span class="text-input-label">note color:</span>
-						<input type="text" class="text edit-note-color" size="30" value="<%- noteColor %>" />
+						<input type="text" class="text" size="30" value="<%- noteColor %>" />
+						<span class="feedback"></span>
 					</div>
-					<div class="text-input">
+					<div class="text-input buttonColor">
 						<span class="text-input-label">button color:</span>
-						<input type="text" class="text edit-button-color" size="30" value="<%- buttonColor %>" />
+						<input type="text" class="text" size="30" value="<%- buttonColor %>" />
+						<span class="feedback"></span>
 					</div>
 					<div class="button-input">
-						<input type="button" class="button default-colors" size="30" value="default colors" />
+						<input type="button" class="button default-colors" size="30" value="reset to default colors" />
 					</div>
 				</section>
-				<div class="errors"></div>
 			</form>
 		</script>
     </body>
