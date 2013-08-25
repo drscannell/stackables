@@ -153,6 +153,7 @@ function main() {
 				'buttonColor': buttonColor
 			});
 			if (this.model.save()) {
+				$('#app').show();
 				this.remove();
 			}
 		},
@@ -172,6 +173,7 @@ function main() {
 			}
 		},
 		render: function() {
+			$('#app').hide();
 			var username = this.model.getUsername();
 			var email = this.model.getEmail();
 			var colorScheme = this.model.getColorScheme();
@@ -213,9 +215,10 @@ function main() {
 		events: {
 			'click input.delete': 'deleteNote',
 			'click input.edit': 'editNote',
-			'click h1.note-heading': 'toggleActive'
+			'click h1.note': 'toggleActive'
 		},
 		toggleActive: function(event) {
+			console.log('toggle active');
 			event.stopPropagation();
 			event.preventDefault();
 			this.model.fetch();
@@ -273,6 +276,7 @@ function main() {
 			console.log('delete note');
 			this.model.setDeleted(true);
 			this.model.save();
+			$('#app').show();
 			this.remove();
 		},
 		saveAndCloseNote: function(event) {
@@ -283,9 +287,11 @@ function main() {
 			this.model.setName(name);
 			this.model.setMarkdown(markdown);
 			this.model.save();
+			$('#app').show();
 			this.remove();
 		},
 		render: function() {
+			$('#app').hide();
 			var name = this.model.getName();
 			var markdown = this.model.getMarkdown();
 			this.$el.html(this.template({'name':name, 'markdown':markdown}));
