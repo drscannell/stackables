@@ -84,10 +84,9 @@ section.form {border:1px solid #aaa;padding:5px;margin:5px 0 5px 0;}
 /* 
  * text inputs 
  */
-div.text-input {text-align:left;margin:5px 0 5px 0;padding:5px;}
+div.text-input {text-align:left;margin:5px;padding:0;}
 span.text-input-label {display:block;font-size:0.9em;text-align:left;}
-input.text-input {
-}
+input.text {display:block;border-sizing:border-box;width:100%;}
 .success > .feedback {color:#88aa33;}
 .success > .feedback:before {content:"✓";font-size:1.5em;line-height:1px;}
 .error > .feedback {color:#aa5533;}
