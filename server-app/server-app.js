@@ -148,7 +148,7 @@ function getCustomizedCss(userId, callback) {
 			/*
 			 * get the final css data
 			 */
-			buildFinalCss(user.colorScheme, function(err, finalCss) {
+			getCustomColorCss(user.colorScheme, function(err, finalCss) {
 				if(!err) {
 					console.log('  Successfully created custom css');
 					callback(null, finalCss);
@@ -165,41 +165,26 @@ function getCustomizedCss(userId, callback) {
 }
 
 /*
- * - get base css
  * - get color scheme template, modify
  *   with user values
- * - combine and deliver
  */
-function buildFinalCss(colorSchemeObject, callback) {
+function getCustomColorCss(colorSchemeObject, callback) {
 	var colorScheme = getSafeColorScheme(colorSchemeObject);
-	/*
-	 * read base css from file
-	 */
-	fs.readFile('client-app/style.css', function(err, baseCss) {
+	fs.readFile('client-app/color-scheme.css', function(err, template) {
 		if (!err) {
 			/*
-			 * read color scheme template from file
+			 * simple regex templating
 			 */
-			fs.readFile('client-app/color-scheme.css', function(err, template) {
-				if (!err) {
-					/*
-					 * simple regex templating
-					 */
-					var colorSchemeCss = template.toString();
-					colorSchemeCss = colorSchemeCss
-						.replace(/\$appColor/g, colorScheme.appColor)
-						.replace(/\$noteColor/g, colorScheme.noteColor)
-						.replace(/\$buttonColor/g, colorScheme.buttonColor);
-					var finalCss = baseCss + colorSchemeCss;
-					callback(null, finalCss);
-				} else {
-					console.log('  error reading css color scheme template');
-					callback({'error':'Failed to generate color scheme CSS'}, null);
-				}
-			});
+			var colorSchemeCss = template.toString();
+			colorSchemeCss = colorSchemeCss
+				.replace(/\$appColor/g, colorScheme.appColor)
+				.replace(/\$noteColor/g, colorScheme.noteColor)
+				.replace(/\$buttonColor/g, colorScheme.buttonColor);
+			var finalCss = colorSchemeCss;
+			callback(null, finalCss);
 		} else {
-			console.log('  error reading base css: ' + err);
-			callback({'error':'Failed to read base css'}, null);
+			console.log('  error reading css color scheme template');
+			callback({'error':'Failed to generate color scheme CSS'}, null);
 		}
 	});
 }
@@ -451,7 +436,7 @@ app.get('/user', function(req, res) {
 app.get('/', function(req, res) {
 	res.sendfile('client-app/index.html');
 });
-app.get('/style.css', function(req, res) {
+app.get('/color-scheme.css', function(req, res) {
 	getCustomizedCss(getUserId(req), function(err, data) {
 		if (!err) {
 			res.status(200).set('Content-Type', 'text/css').send(data);

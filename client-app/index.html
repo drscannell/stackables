@@ -6,6 +6,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="color-scheme.css" />
     </head>
     <body>
 		<div class="app" id="app">
@@ -30,11 +31,11 @@
 				 <h1 class="app-footer">backbone.js | node.js | marked.js</h1>
 			</footer>
 		</div>
-		<script src="json2.js"></script>
-		<script src="jquery-2.0.3.js"></script>
-		<script src="underscore.js"></script>
-		<script src="backbone.js"></script>
-		<script src="marked.js"></script>
+		<script src="libraries/json2.js"></script>
+		<script src="libraries/jquery-2.0.3.js"></script>
+		<script src="libraries/underscore.js"></script>
+		<script src="libraries/backbone.js"></script>
+		<script src="libraries/marked.js"></script>
 		<script src="client-app.js"></script>
 		<script type="text/template" id="note-template">
 			<h1 class="note"><span><%- name %></span></h1>
@@ -50,7 +51,7 @@
 			<header class="app">
 				<div class="buttons">
 					<div class="button-input">
-						<input type="button" class="button delete" value="delete" />
+						<input type="button" class="button delete" value="archive" />
 					</div>
 					<div class="button-input">
 						<input type="button" class="button close" value="save &amp; close" />
