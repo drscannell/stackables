@@ -86,11 +86,11 @@ section.form {border:1px solid #aaa;padding:5px;margin:5px 0 5px 0;}
  */
 div.text-input {text-align:left;margin:5px;padding:0;}
 span.text-input-label {display:block;font-size:0.9em;text-align:left;}
-input.text {display:block;border-sizing:border-box;width:100%;}
+input.text {display:inline-block;border-sizing:border-box;width:90%;}
 .success > .feedback {color:#88aa33;}
-.success > .feedback:before {content:"✓";font-size:1.5em;line-height:1px;}
+.success > .feedback:before {content:"✓";margin-left:5px;font-size:1.5em;line-height:1px;}
 .error > .feedback {color:#aa5533;}
-.error > .feedback:before {content:"✗ ";font-size:1.5em;line-height:1px;}
+.error > .feedback:before {content:"✗";margin-left:5px;font-size:1.5em;line-height:1px;}
 /*
  * text area
  */

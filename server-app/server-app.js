@@ -144,7 +144,6 @@ function getCustomizedCss(userId, callback) {
 	User.findById(userId, {'colorScheme':true}, function(err, user) {
 		if (!err && user != null) {
 			console.log('  got user data to build css from');
-			console.log(user);
 			/*
 			 * get the final css data
 			 */
@@ -225,7 +224,7 @@ function getSafeColorScheme(colorSchemeObject) {
  */
 function isValidColorCode(string) {
 	try {
-		return string.match(/^#([0-9abcdef]{6}|[0-9abcdef]{3})$/);
+		return string.match(/^#([0-9abcdef]{6}|[0-9abcdef]{3})$/i);
 	} catch(ex) {
 		console.log(ex);
 		return false;
@@ -266,7 +265,6 @@ function updateUser(req, res) {
 	delete req.body._id;
 	console.log('  username: ' + req.body.username);
 	console.log('  email: ' + req.body.email);
-	console.log('  colorScheme: ' + req.body.colorScheme);
 	User.findByIdAndUpdate(id, req.body, function(err, doc) {
 		if (!err) {
 			console.log('  successfully updated user');
