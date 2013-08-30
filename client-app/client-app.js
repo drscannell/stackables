@@ -72,7 +72,6 @@ function main() {
 	var User = Backbone.Model.extend({
 		url: '/user',
 		validate: function(attrs, options) {
-			console.log('Validating User Attributes');
 			var errors = [];
 			if (!this.isValidColorCode(attrs.colorScheme.appColor)) {
 				errors.push({
@@ -98,7 +97,7 @@ function main() {
 		},
 		isValidColorCode: function(string) {
 			try {
-				return string.match(/^#([0-9abcdef]{6}|[0-9abcdef]{3})$/);
+				return string.match(/^#([0-9abcdef]{6}|[0-9abcdef]{3})$/i);
 			} catch(ex) {
 				console.log(ex);
 				return false;
@@ -145,11 +144,18 @@ function main() {
 		},
 		events: {
 			'click input.close': 'saveAndClose',
-			'click input.default-colors': 'applyDefaultColorScheme'
+			'click input.default-colors': 'applyDefaultColorScheme',
+			'input input.js-color-input': 'handleColorChange'
 		},
 		saveAndClose: function(event) {
 			event.stopPropagation();
-			console.log('save and close user');
+			this.updateModel();
+			if (this.model.save()) {
+				$('#app').show();
+				this.remove();
+			}
+		},
+		updateModel: function() {
 			var email = $('.edit-email', this.$el).first().val();
 			this.model.setEmail(email);
 			var appColor = $('.appColor > input', this.$el).first().val();
@@ -160,26 +166,33 @@ function main() {
 				'noteColor': noteColor,
 				'buttonColor': buttonColor
 			});
+
+		},
+		handleColorChange: function() {
+			this.updateModel();
 			if (this.model.save()) {
-				$('#app').show();
-				this.remove();
+				/*
+				 * update color css
+				 */
+				$('head').append('<link type="text/css" rel="stylesheet" href="color-scheme.css" />');
+				this.markAllInputsValid();
 			}
 		},
+		markAllInputsValid: function() {
+			$('.js-input-container', this.$el).removeClass('error').addClass('success');
+		},
 		applyDefaultColorScheme: function() {
-			console.log('Applying default color scheme');
 			var defaults = this.model.getDefaultColorScheme();
 			$('.appColor > input', this.$el).first().val(defaults.appColor);
 			$('.noteColor > input', this.$el).first().val(defaults.noteColor);
 			$('.buttonColor > input', this.$el).first().val(defaults.buttonColor);
 			$('.text-input', this.$el).removeClass('error').addClass('success');
+			this.handleColorChange();
 		},
 		reportValidationErrors: function(model, errors) {
-			console.log('reportValidationErrors:');
 			$('.text-input', this.$el).removeClass('error').addClass('success');
 			_.each(errors, function(error, i) {
-				console.log(i);
 				var query = '.' + error.class;
-				console.log(query);
 				$(query, this.$el).addClass('error');
 			});
 		},
@@ -229,7 +242,6 @@ function main() {
 			'click h1.note': 'toggleActive'
 		},
 		toggleActive: function(event) {
-			console.log('toggle active');
 			event.stopPropagation();
 			event.preventDefault();
 			this.model.fetch();
@@ -237,14 +249,12 @@ function main() {
 		},
 		deleteNote: function(event) {
 			event.stopPropagation();
-			console.log('delete note');
 			this.model.setDeleted(true);
 			this.model.save();
 			this.remove();
 		},
 		editNote: function(event) {
 			event.stopPropagation();
-			console.log('edit note');
 			// invoke edit note view after fetch
 			if ( this.model.get('_id') ) {
 				this.model.fetch();
@@ -284,7 +294,6 @@ function main() {
 		},
 		deleteNote: function(event) {
 			event.stopPropagation();
-			console.log('delete note');
 			this.model.setDeleted(true);
 			this.model.save();
 			$('#app').show();
@@ -292,7 +301,6 @@ function main() {
 		},
 		saveAndCloseNote: function(event) {
 			event.stopPropagation();
-			console.log('save and close note');
 			var name = $('.edit-name', this.$el).first().val();
 			var markdown = $('.edit-markdown', this.$el).first().val();
 			this.model.setName(name);
@@ -338,36 +346,9 @@ function main() {
 			$('#notes').prepend(view.render().$el);
 		},
 		showSettingsView: function(){
-			console.log('username: ' + this.userModel.getUsername() );
 			var editView = new EditUserView({'model':this.userModel});
 			$('body').append(editView.render().$el);
 				
-		},
-		userChange: function() {
-			console.log('userChange');
-			var colorScheme = this.userModel.getColorScheme();
-			this.updateColorScheme(colorScheme);
-		},
-		updateColorScheme: function(colorScheme) {
-			/*
-			$('header, footer').css('background',colorScheme.appColor);
-			$('h1.note-heading').css('background', colorScheme.noteColor);
-			$('body.not-mobile h1.note-heading').hover(
-				function(){
-					$(this).css('background', colorScheme.buttonColor);
-				},
-				function(){
-					$(this).css('background', colorScheme.noteColor);
-				});
-			$('input.button').css('background', colorScheme.buttonColor);
-			$('body.not-mobile input.button').hover(
-				function(){
-					$(this).css('background', colorScheme.noteColor);
-				},
-				function(){
-					$(this).css('background', colorScheme.buttonColor);
-				});
-			*/
 		},
 		logout: function() {
 			jQuery.post('logout', function(data) {
