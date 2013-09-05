@@ -129,6 +129,12 @@ function main() {
 		},
 		setColorScheme: function(colorScheme) {
 			this.set('colorScheme', colorScheme);
+		},
+		getStacks: function() {
+			return this.get('stacks');
+		},
+		addStack: function(newStackName) {
+			console.log('so, you wanna create a stack named ' + newStackName + '?');
 		}
 	});
 
@@ -141,6 +147,8 @@ function main() {
 		template: _.template( $('#edit-user-template').html() ),
 		initialize: function(options) {
 			this.listenTo(this.model, 'invalid', this.reportValidationErrors);
+			console.log('getStacks()');
+			console.log(this.model.getStacks());
 		},
 		events: {
 			'click input.close': 'saveAndClose',

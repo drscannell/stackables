@@ -72,9 +72,6 @@ if (mongoURI == null) throw new Error('Mongo URI environment variable not set up
 
 /*
  * Mongo Connect
- * 
- * The moment of truth. Many tears have been
- * shed trying to get that elusive connection.
  */
 var mongoose = require('mongoose');
 mongoose.connect(mongoURI);
@@ -114,14 +111,22 @@ var userSchema = mongoose.Schema({
 		'appColor': String,
 		'noteColor': String,
 		'buttonColor': String
-	}
+	},
+	'stacks': Array
 }, {'collection':'users'});
 var User = mongoose.model('User', userSchema);
+
+var stackSchema = mongoose.Schema({
+	'name':String,
+	'notes':Array
+}, {'collection':'stacks'});
+var Stack = mongoose.model('Stack', stackSchema);
 
 /*
  * get user
  */
 function getUser(query, callback) {
+	console.log('getUser');
 	User.findOne( query, function(err, user) {
 		if(!err && user != null) {
 			callback(null, user);
@@ -417,9 +422,11 @@ app.post('/user', function(req, res){
 
 app.get('/user', function(req, res) {
 	var id = getUserId(req);
-	User.findById( id, {'username':true, 'email':true, 'colorScheme':true}, function(err, user) {
+	User.findById( id, {'username':true, 'email':true, 'colorScheme':true, 'stacks':true}, function(err, user) {
 		if(!err && user != null) {
 			console.log('  Retrieved user successfully!');
+			console.log('user.stacks:');
+			console.log(user);
 			res.send(user);
 		} else {
 			res.status(501).send({'error':'Failed to retrieve data from database.'});
