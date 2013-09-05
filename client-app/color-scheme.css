@@ -2,8 +2,16 @@
 /* color scheme */
 body               {background:#ffffff;}
 header.app,footer.app      {background:$appColor;color:#FFFFFF;}
-h1.note    {background:$noteColor;color:#FFFFFF;}
-body.not-mobile h1.note:hover {background:$buttonColor;color:#FFFFFF;}
+h1.note {background:$buttonColor;color:#FFFFFF;}
+body.not-mobile h1.note:hover {background:$noteColor;color:#FFFFFF;}
+article.inactive-note h1.note    {background:$noteColor;color:#FFFFFF;}
+body.not-mobile article.inactive-note h1.note:hover {background:$buttonColor;color:#FFFFFF;}
 input.button       {background:$buttonColor;color:#FFFFFF;}
 body.not-mobile input.button:hover {background:$noteColor;color:#FFFFFF;}
+
+
+@media screen and (min-width:800px) {
+	div.app {background:$noteColor;}
+	article.note {background:white;}
+}
 
