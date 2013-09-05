@@ -4,7 +4,7 @@
 body {
 	margin:0;
 	padding:0;
-	font-family:sans-serif;
+	font-family:Actor, sans-serif;
 }
 h1 { font-size:2.00em;font-weight:normal;margin:1em 0 1em 0; }
 h2 { font-size:1.75em;font-weight:normal;margin:1em 0 1em 0; }
@@ -28,11 +28,13 @@ a {text-decoration:none;word-wrap:break-word;}
 /* 
  * App header/footer
  */
-div.app {margin:0;padding:0;outline:0;border:0;}
+div.app {margin:0;padding:0;outline:0;border:0;background:white;}
 header.app {padding:10px 0 10px 0;margin:0;overflow:hidden;}
 h1.app-header {text-align:center;margin:5px;font-size:1em;font-weight:normal;color:#FFFFFF;}
 footer.app {padding:10px 0 10px 0;margin:0;overflow:hidden;}
 h1.app-footer {text-align:center;margin:5px;font-size:1em;font-weight:normal;color:#FFFFFF;}
+a.app-footer {color:inherit;}
+a.app-footer:hover {text-decoration:underline;}
 /*
  * note view
  */
@@ -111,8 +113,21 @@ textarea.textarea {
  * enhancement for large screens 
  */
 @media screen and (min-width:800px) {
+	body {text-align:center;}
+	div.app {
+		width:800px;
+		display:inline-block;
+		text-align:left;
+		margin-top:5px;
+		margin-bottom:5px;
+		border-radius:5px;
+		overflow:hidden;
+	}
 	section#notes {
 		text-align:left;
+	}
+	header.app {
+		padding-right:10px;
 	}
 	h1.app-header {
 		text-align:right;
@@ -122,21 +137,21 @@ textarea.textarea {
 	 * note view
 	 */
 	article.note {
-		margin: 1px;
+		margin: 0;
 		display:inline-block;
 		vertical-align:middle;
 		text-align:left;
-		width:99%;
+		width:100%;
 	}
 	article.inactive-note {
-		width:49%;
-		width:33%;
+		width:33.333%;
 	}
 	h1.note {
 		height:3em;
 		font-size:1em;
-		border-radius:5px;
+		border-radius:0px;
 		line-height:3em;
+		text-align:center;
 	}
 	h1.note > span {
 		display:inline-block;
