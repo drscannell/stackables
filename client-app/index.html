@@ -15,13 +15,16 @@
 				<h1 class="app-header">stackabl.es</h1>
 				<div class="buttons">
 					<div class="button-input">
-						<input type="button" class="button logout" value="logout" />
+						<input type="button" class="button b3 logout" value="logout" />
 					</div>
 					<div class="button-input">
-						<input type="button" class="button settings" value="settings" />
+						<input type="button" class="button b2 settings" value="settings" />
 					</div>
 					<div class="button-input">
-						<input type="button" class="button add" value="add" />
+						<input type="button" class="button b2 js-add-stack" value="add stack" />
+					</div>
+					<div class="button-input">
+						<input type="button" class="button b1 add" value="add note" />
 					</div>
 				</div>
 			</header>
@@ -46,7 +49,7 @@
 			<section class="note-body inactive-note">
 				<div class="buttons">
 					<div class="button-input">
-						<input type="button" class="button edit" value="edit" />
+						<input type="button" class="button b3 edit" value="edit" />
 					</div>
 				</div>
 			</section>
@@ -55,10 +58,10 @@
 			<header class="app">
 				<div class="buttons">
 					<div class="button-input">
-						<input type="button" class="button delete" value="archive" />
+						<input type="button" class="button b3 delete" value="archive" />
 					</div>
 					<div class="button-input">
-						<input type="button" class="button close" value="save &amp; close" />
+						<input type="button" class="button b1 close" value="save &amp; close" />
 					</div>
 				</div>
 			</header>
@@ -67,6 +70,7 @@
 					<span class="text-input-label">name:</span>
 					<input type="text" class="text edit-name" value="<%- name %>" />
 				</div>
+					<span class="text-input-label">markdown:</span>
 				<div class="textarea">
 					<textarea class="textarea edit-markdown"><%- markdown %></textarea>
 				</div>
