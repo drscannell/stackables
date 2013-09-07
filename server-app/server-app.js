@@ -72,9 +72,6 @@ if (mongoURI == null) throw new Error('Mongo URI environment variable not set up
 
 /*
  * Mongo Connect
- * 
- * The moment of truth. Many tears have been
- * shed trying to get that elusive connection.
  */
 var mongoose = require('mongoose');
 mongoose.connect(mongoURI);
@@ -114,14 +111,22 @@ var userSchema = mongoose.Schema({
 		'appColor': String,
 		'noteColor': String,
 		'buttonColor': String
-	}
+	},
+	'stacks': Array
 }, {'collection':'users'});
 var User = mongoose.model('User', userSchema);
+
+var stackSchema = mongoose.Schema({
+	'name':String,
+	'notes':Array
+}, {'collection':'stacks'});
+var Stack = mongoose.model('Stack', stackSchema);
 
 /*
  * get user
  */
 function getUser(query, callback) {
+	console.log('getUser');
 	User.findOne( query, function(err, user) {
 		if(!err && user != null) {
 			callback(null, user);
@@ -144,11 +149,10 @@ function getCustomizedCss(userId, callback) {
 	User.findById(userId, {'colorScheme':true}, function(err, user) {
 		if (!err && user != null) {
 			console.log('  got user data to build css from');
-			console.log(user);
 			/*
 			 * get the final css data
 			 */
-			buildFinalCss(user.colorScheme, function(err, finalCss) {
+			getCustomColorCss(user.colorScheme, function(err, finalCss) {
 				if(!err) {
 					console.log('  Successfully created custom css');
 					callback(null, finalCss);
@@ -165,41 +169,26 @@ function getCustomizedCss(userId, callback) {
 }
 
 /*
- * - get base css
  * - get color scheme template, modify
  *   with user values
- * - combine and deliver
  */
-function buildFinalCss(colorSchemeObject, callback) {
+function getCustomColorCss(colorSchemeObject, callback) {
 	var colorScheme = getSafeColorScheme(colorSchemeObject);
-	/*
-	 * read base css from file
-	 */
-	fs.readFile('client-app/style.css', function(err, baseCss) {
+	fs.readFile('client-app/color-scheme.css', function(err, template) {
 		if (!err) {
 			/*
-			 * read color scheme template from file
+			 * simple regex templating
 			 */
-			fs.readFile('client-app/color-scheme.css', function(err, template) {
-				if (!err) {
-					/*
-					 * simple regex templating
-					 */
-					var colorSchemeCss = template.toString();
-					colorSchemeCss = colorSchemeCss
-						.replace(/\$appColor/g, colorScheme.appColor)
-						.replace(/\$noteColor/g, colorScheme.noteColor)
-						.replace(/\$buttonColor/g, colorScheme.buttonColor);
-					var finalCss = baseCss + colorSchemeCss;
-					callback(null, finalCss);
-				} else {
-					console.log('  error reading css color scheme template');
-					callback({'error':'Failed to generate color scheme CSS'}, null);
-				}
-			});
+			var colorSchemeCss = template.toString();
+			colorSchemeCss = colorSchemeCss
+				.replace(/\$appColor/g, colorScheme.appColor)
+				.replace(/\$noteColor/g, colorScheme.noteColor)
+				.replace(/\$buttonColor/g, colorScheme.buttonColor);
+			var finalCss = colorSchemeCss;
+			callback(null, finalCss);
 		} else {
-			console.log('  error reading base css: ' + err);
-			callback({'error':'Failed to read base css'}, null);
+			console.log('  error reading css color scheme template');
+			callback({'error':'Failed to generate color scheme CSS'}, null);
 		}
 	});
 }
@@ -240,11 +229,97 @@ function getSafeColorScheme(colorSchemeObject) {
  */
 function isValidColorCode(string) {
 	try {
-		return string.match(/^#([0-9abcdef]{6}|[0-9abcdef]{3})$/);
+		return string.match(/^#([0-9abcdef]{6}|[0-9abcdef]{3})$/i);
 	} catch(ex) {
 		console.log(ex);
 		return false;
 	}
+}
+
+/*
+ * Update a single user
+ */
+function updateUser(req, res) {
+	var id = req.body._id;
+	delete req.body._id;
+	console.log('  username: ' + req.body.username);
+	console.log('  email: ' + req.body.email);
+	User.findByIdAndUpdate(id, req.body, function(err, doc) {
+		if (!err) {
+			console.log('  successfully updated user');
+			res.send(200);
+		} else {
+			console.log(err);
+			res.send(500);
+		}
+	});
+}
+/* ------- stacks -------*/
+/*
+ * Add a single stack
+ */
+function addStack(req, res) {
+	console.log('addStack');
+	console.log('  name: ' + req.body.name);
+	var newStack = new Stack(req.body);
+	newStack.save(function(err, stack) {
+		if (!err) {
+			console.log('  successfully added stack');
+			res.status(200);
+			res.send(stack);
+		} else {
+			console.log(err);
+			res.send(500);
+		}
+	});
+}
+
+/*
+ * Update a single stack
+ */
+function updateStack(req, res) {
+	console.log('updateStack');
+	/*
+	var noteId = req.body._id;
+	delete req.body._id;
+	// if empty, fill out createdby
+	if( !('createdby' in req.body) ) {
+		req.body.createdby = getUserObjectId(req);
+	}
+	console.log('  name: ' + req.body.name);
+	console.log('  createdby: ' + req.body.createdby);
+	console.log('  deleted: ' + req.body.deleted);
+	Note.findByIdAndUpdate(noteId, req.body, function(err, doc) {
+		if (!err) {
+			console.log('  successfully updated');
+			res.send(200);
+		} else {
+			console.log(err);
+			res.send(500);
+		}
+	});
+	*/
+}
+
+/* ------end stacks ------- */
+/*
+ * Add a single note
+ */
+function addNote(req, res) {
+	req.body.createdby = getUserObjectId(req);
+	console.log('  name: ' + req.body.name);
+	console.log('  createdby: ' + req.body.createdby);
+	var newNote = new Note(req.body);
+	newNote.save(function(err, note) {
+		if (!err) {
+			console.log('  successfully added note');
+			res.status(200);
+			res.send(note);
+		} else {
+			console.log(err);
+			res.send(500);
+		}
+	});
 }
 
 /*
@@ -273,45 +348,6 @@ function updateNote(req, res) {
 	});
 }
 
-/*
- * Update a single user
- */
-function updateUser(req, res) {
-	var id = req.body._id;
-	delete req.body._id;
-	console.log('  username: ' + req.body.username);
-	console.log('  email: ' + req.body.email);
-	console.log('  colorScheme: ' + req.body.colorScheme);
-	User.findByIdAndUpdate(id, req.body, function(err, doc) {
-		if (!err) {
-			console.log('  successfully updated user');
-			res.send(200);
-		} else {
-			console.log(err);
-			res.send(500);
-		}
-	});
-}
-
-/*
- * Add a single note
- */
-function addNote(req, res) {
-	req.body.createdby = getUserObjectId(req);
-	console.log('  name: ' + req.body.name);
-	console.log('  createdby: ' + req.body.createdby);
-	var newNote = new Note(req.body);
-	newNote.save(function(err, note) {
-		if (!err) {
-			console.log('  successfully added note');
-			res.status(200);
-			res.send(note);
-		} else {
-			console.log(err);
-			res.send(500);
-		}
-	});
-}
 /*
  * Fetch all non-deleted notes
  * 
@@ -424,6 +460,17 @@ app.post('/note', function(req, res){
 	}
 });
 
+app.post('/stack', function(req, res){
+	console.log('req.body:');
+	console.log(req.body);
+	console.log('req.query:');
+	console.log(req.query);
+	if ( '_id' in req.body ) {
+		updateStack(req, res);
+	} else {
+		addStack(req, res);
+	}
+});
 app.post('/user', function(req, res){
 	if ( '_id' in req.body ) {
 		updateUser(req, res);
@@ -434,9 +481,11 @@ app.post('/user', function(req, res){
 
 app.get('/user', function(req, res) {
 	var id = getUserId(req);
-	User.findById( id, {'username':true, 'email':true, 'colorScheme':true}, function(err, user) {
+	User.findById( id, {'username':true, 'email':true, 'colorScheme':true, 'stacks':true}, function(err, user) {
 		if(!err && user != null) {
 			console.log('  Retrieved user successfully!');
+			console.log('user.stacks:');
+			console.log(user);
 			res.send(user);
 		} else {
 			res.status(501).send({'error':'Failed to retrieve data from database.'});
@@ -451,7 +500,7 @@ app.get('/user', function(req, res) {
 app.get('/', function(req, res) {
 	res.sendfile('client-app/index.html');
 });
-app.get('/style.css', function(req, res) {
+app.get('/color-scheme.css', function(req, res) {
 	getCustomizedCss(getUserId(req), function(err, data) {
 		if (!err) {
 			res.status(200).set('Content-Type', 'text/css').send(data);

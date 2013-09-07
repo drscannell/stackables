@@ -1,9 +1,23 @@
 
 /* color scheme */
 body               {background:#ffffff;}
-header,footer      {background:$appColor;color:#FFFFFF;}
-h1.note-heading    {background:$noteColor;color:#FFFFFF;}
-body.not-mobile h1.note-heading:hover {background:$buttonColor;color:#FFFFFF;}
-input.button       {background:$buttonColor;color:#FFFFFF;}
+header.app,footer.app      {background:transparent;color:#888;}
+h1.note {background:$buttonColor;color:#FFFFFF;}
+body.not-mobile h1.note:hover {background:$noteColor;color:#FFFFFF;}
+article.inactive-note h1.note    {background:$noteColor;color:#FFFFFF;}
+body.not-mobile article.inactive-note h1.note:hover {background:$buttonColor;color:#FFFFFF;}
+input.button       {border:1px solid #000;color:#000;background:white;}
 body.not-mobile input.button:hover {background:$noteColor;color:#FFFFFF;}
+
+
+@media screen and (min-width:800px) {
+	header.app,footer.app {background:#FFFFFF;color:#888;font-weight:bold;}
+	h1.note {background:transparent;margin-left:10px;margin-right:10px;color:#000;font-size:1.5em;border-bottom:1px solid #888;border-radius:0px;}
+	body.not-mobile h1.note:hover {background:transparent;color:#888;}
+	article.inactive-note h1.note {color:#000;background:#FFFFFF;font-size:1em;border:0;}
+	body.not-mobile article.inactive-note h1.note:hover {background:$buttonColor;color:#FFFFFF;border-radius:5px;}
+	footer.app {margin-top:10px;padding-top:5px;}
+	/*div.app {background:$noteColor;}*/
+	article.note {background:white;}
+}
 

@@ -3,76 +3,146 @@
     <head>
         <title>stackables</title>
     	<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="style.css" />
+		<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,400italic,600italic' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="color-scheme.css" />
     </head>
     <body>
-		<div id="app">
-			<header>
-				<input type="button" class="button settings" value="settings" />
-				<input type="button" class="button logout" value="logout" />
-				<input type="button" class="button add" value="add" />
+		<div class="app" id="app">
+			<header class="app">
+				<h1 class="app-header">stackabl.es</h1>
+				<div class="buttons">
+					<div class="button-input">
+						<input type="button" class="button b3 js-logout" value="logout" />
+					</div>
+					<div class="button-input">
+						<input type="button" class="button b2 js-settings" value="settings" />
+					</div>
+					<!--<div class="button-input">
+						<input type="button" class="button b2 js-add-stack" value="add stack" />
+					</div>-->
+					<div class="button-input">
+						<input type="button" class="button b1 js-add-note" value="add note" />
+					</div>
+				</div>
 			</header>
-			<section id="notes">
+			<section class="notes" id="notes">
 				<!-- notes will be inserted here -->	
 			</section>
-			<footer>
-				 backbone.js | node.js | marked.js
+			<footer class="app">
+				 <h1 class="app-footer">
+					<a class="app-footer" href="http://expressjs.com/">express</a> | 
+					<a class="app-footer" href="http://backbonejs.org/">backbone</a> | 
+					<a class="app-footer" href="https://github.com/chjj/marked">marked</a></h1>
 			</footer>
 		</div>
-		<script src="json2.js"></script>
-		<script src="jquery-2.0.3.js"></script>
-		<script src="underscore.js"></script>
-		<script src="backbone.js"></script>
-		<script src="marked.js"></script>
-		<script src="client-app.js"></script>
 		<script type="text/template" id="note-template">
-			<h1 class="note-heading"><span><%- name %></span></h1>
+			<h1 class="note"><span><%- name %></span></h1>
 			<section class="note-body inactive-note">
-				<input type="button" class="button edit" value="edit" />
+				<div class="buttons">
+					<div class="button-input">
+						<input type="button" class="button b3 edit" value="edit" />
+					</div>
+				</div>
 			</section>
 		</script>
 		<script type="text/template" id="edit-note-template">
-			<header class="edit-note-buttons">
-				<input type="button" class="button delete" value="delete" />
-				<input type="button" class="button close" value="close" />
+			<header class="app">
+				<div class="buttons">
+					<div class="button-input">
+						<input type="button" class="button b3 delete" value="archive" />
+					</div>
+					<div class="button-input">
+						<input type="button" class="button b1 close" value="save &amp; close" />
+					</div>
+				</div>
 			</header>
-			<input type="text" class="edit-name" value="<%- name %>" />
-			<div class="textarea">
-				<textarea class="edit-markdown"><%- markdown %></textarea>
-			</div>
-		</script>
-		<script type="text/template" id="edit-user-template">
-			<header class="edit-user-buttons">
-				<input type="button" class="button default-colors" value="default colors" />
-				<input type="button" class="button close" value="save &amp; close" />
-			</header>
-			<form class="edit-user-form">
-				<h2>Account Details</h2>
-				<div>
-					<span class="input-label">username:</span>
-					<input type="text" class="text edit-username" value="<%- username %>" readonly />
+			<form class="form">
+				<div class="text-input">
+					<span class="text-input-label">name:</span>
+					<input type="text" class="text edit-name" value="<%- name %>" />
 				</div>
-				<div>
-					<span class="input-label">email:</span>
-					<input type="text" class="text edit-email" value="<%- email %>" readonly />
+					<span class="text-input-label">markdown:</span>
+				<div class="textarea">
+					<textarea class="textarea edit-markdown"><%- markdown %></textarea>
 				</div>
-				<h2>Color Scheme</h2>	
-				<p><i>Changes take effect on next refresh.</i></p>
-				<div>
-					<span class="input-label">app color:</span>
-					<input type="text" class="text edit-app-color" value="<%- appColor %>" />
-				</div>
-				<div>
-					<span class="input-label">note color:</span>
-					<input type="text" class="text edit-note-color" value="<%- noteColor %>" />
-				</div>
-				<div>
-					<span class="input-label">button color:</span>
-					<input type="text" class="text edit-button-color" value="<%- buttonColor %>" />
-				</div>
-				<div class="errors"></div>
 			</form>
 		</script>
+		<script type="text/template" id="edit-user-template">
+			<header class="app">
+				<div class="button-input">
+					<input type="button" class="button close" value="save &amp; close" />
+				</div>
+			</header>
+			<form class="form">
+				<section class="form">
+					<h2 class="form">Account Details</h2>
+					<div class="text-input">
+						<span class="text-input-label">username:</span>
+						<input type="text" class="text edit-username" value="<%- username %>" readonly />
+					</div>
+					<div class="text-input">
+						<span class="text-input-label">email:</span>
+						<input type="text" class="text edit-email" value="<%- email %>" readonly />
+					</div>
+				</section>
+				<section class="form">
+					<h2 class="form">Color Scheme</h2>	
+					<div class="text-input appColor js-input-container">
+						<span class="text-input-label">app color:</span>
+						<input type="text" class="text js-color-input" value="<%- appColor %>" />
+						<span class="feedback"></span>
+					</div>
+					<div class="text-input noteColor js-input-container">
+						<span class="text-input-label">note color:</span>
+						<input type="text" class="text js-color-input" value="<%- noteColor %>" />
+						<span class="feedback"></span>
+					</div>
+					<div class="text-input buttonColor js-input-container">
+						<span class="text-input-label">button color:</span>
+						<input type="text" class="text js-color-input" value="<%- buttonColor %>" />
+						<span class="feedback"></span>
+					</div>
+					<div class="button-input">
+						<input type="button" class="button default-colors" value="reset to default colors" />
+					</div>
+				</section>
+			</form>
+		</script>
+		<script type="text/template" id="edit-stack-template">
+			<header class="app">
+				<div class="button-input">
+					<input type="button" class="button b3 delete" value="archive" />
+				</div>
+				<div class="button-input">
+					<input type="button" class="button b1 close" value="save &amp; close" />
+				</div>
+			</header>
+			<form class="form">
+				<section class="form">
+					<h2 class="form">Edit Stack</h2>
+					<div class="text-input">
+						<span class="text-input-label">name:</span>
+						<input type="text" class="text js-stack-name" value="<%- stackName %>" />
+					</div>
+					<div class="text-input">
+						<span class="text-input-label">notes:</span>
+						<ol>
+							<li></li>
+							<li></li>
+							<li></li>
+						</ol>
+					</div>
+				</section>
+			</form>
+		</script>
+		<script src="libraries/json2.js"></script>
+		<script src="libraries/jquery-2.0.3.js"></script>
+		<script src="libraries/underscore.js"></script>
+		<script src="libraries/backbone.js"></script>
+		<script src="libraries/marked.js"></script>
+		<script src="client-app.js"></script>
     </body>
 </html>
