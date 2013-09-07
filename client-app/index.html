@@ -15,16 +15,16 @@
 				<h1 class="app-header">stackabl.es</h1>
 				<div class="buttons">
 					<div class="button-input">
-						<input type="button" class="button b3 logout" value="logout" />
+						<input type="button" class="button b3 js-logout" value="logout" />
 					</div>
 					<div class="button-input">
-						<input type="button" class="button b2 settings" value="settings" />
+						<input type="button" class="button b2 js-settings" value="settings" />
 					</div>
-					<div class="button-input">
+					<!--<div class="button-input">
 						<input type="button" class="button b2 js-add-stack" value="add stack" />
-					</div>
+					</div>-->
 					<div class="button-input">
-						<input type="button" class="button b1 add" value="add note" />
+						<input type="button" class="button b1 js-add-note" value="add note" />
 					</div>
 				</div>
 			</header>
@@ -38,12 +38,6 @@
 					<a class="app-footer" href="https://github.com/chjj/marked">marked</a></h1>
 			</footer>
 		</div>
-		<script src="libraries/json2.js"></script>
-		<script src="libraries/jquery-2.0.3.js"></script>
-		<script src="libraries/underscore.js"></script>
-		<script src="libraries/backbone.js"></script>
-		<script src="libraries/marked.js"></script>
-		<script src="client-app.js"></script>
 		<script type="text/template" id="note-template">
 			<h1 class="note"><span><%- name %></span></h1>
 			<section class="note-body inactive-note">
@@ -117,5 +111,38 @@
 				</section>
 			</form>
 		</script>
+		<script type="text/template" id="edit-stack-template">
+			<header class="app">
+				<div class="button-input">
+					<input type="button" class="button b3 delete" value="archive" />
+				</div>
+				<div class="button-input">
+					<input type="button" class="button b1 close" value="save &amp; close" />
+				</div>
+			</header>
+			<form class="form">
+				<section class="form">
+					<h2 class="form">Edit Stack</h2>
+					<div class="text-input">
+						<span class="text-input-label">name:</span>
+						<input type="text" class="text js-stack-name" value="<%- stackName %>" />
+					</div>
+					<div class="text-input">
+						<span class="text-input-label">notes:</span>
+						<ol>
+							<li></li>
+							<li></li>
+							<li></li>
+						</ol>
+					</div>
+				</section>
+			</form>
+		</script>
+		<script src="libraries/json2.js"></script>
+		<script src="libraries/jquery-2.0.3.js"></script>
+		<script src="libraries/underscore.js"></script>
+		<script src="libraries/backbone.js"></script>
+		<script src="libraries/marked.js"></script>
+		<script src="client-app.js"></script>
     </body>
 </html>

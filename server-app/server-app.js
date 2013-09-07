@@ -237,6 +237,92 @@ function isValidColorCode(string) {
 }
 
 /*
+ * Update a single user
+ */
+function updateUser(req, res) {
+	var id = req.body._id;
+	delete req.body._id;
+	console.log('  username: ' + req.body.username);
+	console.log('  email: ' + req.body.email);
+	User.findByIdAndUpdate(id, req.body, function(err, doc) {
+		if (!err) {
+			console.log('  successfully updated user');
+			res.send(200);
+		} else {
+			console.log(err);
+			res.send(500);
+		}
+	});
+}
+/* ------- stacks -------*/
+/*
+ * Add a single stack
+ */
+function addStack(req, res) {
+	console.log('addStack');
+	console.log('  name: ' + req.body.name);
+	var newStack = new Stack(req.body);
+	newStack.save(function(err, stack) {
+		if (!err) {
+			console.log('  successfully added stack');
+			res.status(200);
+			res.send(stack);
+		} else {
+			console.log(err);
+			res.send(500);
+		}
+	});
+}
+
+/*
+ * Update a single stack
+ */
+function updateStack(req, res) {
+	console.log('updateStack');
+	/*
+	var noteId = req.body._id;
+	delete req.body._id;
+	// if empty, fill out createdby
+	if( !('createdby' in req.body) ) {
+		req.body.createdby = getUserObjectId(req);
+	}
+	console.log('  name: ' + req.body.name);
+	console.log('  createdby: ' + req.body.createdby);
+	console.log('  deleted: ' + req.body.deleted);
+	Note.findByIdAndUpdate(noteId, req.body, function(err, doc) {
+		if (!err) {
+			console.log('  successfully updated');
+			res.send(200);
+		} else {
+			console.log(err);
+			res.send(500);
+		}
+	});
+	*/
+}
+
+/* ------end stacks ------- */
+/*
+ * Add a single note
+ */
+function addNote(req, res) {
+	req.body.createdby = getUserObjectId(req);
+	console.log('  name: ' + req.body.name);
+	console.log('  createdby: ' + req.body.createdby);
+	var newNote = new Note(req.body);
+	newNote.save(function(err, note) {
+		if (!err) {
+			console.log('  successfully added note');
+			res.status(200);
+			res.send(note);
+		} else {
+			console.log(err);
+			res.send(500);
+		}
+	});
+}
+
+/*
  * Update a single note
  */
 function updateNote(req, res) {
@@ -262,44 +348,6 @@ function updateNote(req, res) {
 	});
 }
 
-/*
- * Update a single user
- */
-function updateUser(req, res) {
-	var id = req.body._id;
-	delete req.body._id;
-	console.log('  username: ' + req.body.username);
-	console.log('  email: ' + req.body.email);
-	User.findByIdAndUpdate(id, req.body, function(err, doc) {
-		if (!err) {
-			console.log('  successfully updated user');
-			res.send(200);
-		} else {
-			console.log(err);
-			res.send(500);
-		}
-	});
-}
-
-/*
- * Add a single note
- */
-function addNote(req, res) {
-	req.body.createdby = getUserObjectId(req);
-	console.log('  name: ' + req.body.name);
-	console.log('  createdby: ' + req.body.createdby);
-	var newNote = new Note(req.body);
-	newNote.save(function(err, note) {
-		if (!err) {
-			console.log('  successfully added note');
-			res.status(200);
-			res.send(note);
-		} else {
-			console.log(err);
-			res.send(500);
-		}
-	});
-}
 /*
  * Fetch all non-deleted notes
  * 
@@ -412,6 +460,17 @@ app.post('/note', function(req, res){
 	}
 });
 
+app.post('/stack', function(req, res){
+	console.log('req.body:');
+	console.log(req.body);
+	console.log('req.query:');
+	console.log(req.query);
+	if ( '_id' in req.body ) {
+		updateStack(req, res);
+	} else {
+		addStack(req, res);
+	}
+});
 app.post('/user', function(req, res){
 	if ( '_id' in req.body ) {
 		updateUser(req, res);

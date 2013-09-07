@@ -49,6 +49,12 @@ article.inactive-note > section.note-body {
 	display:none;
 }
 /*
+ * edit view
+ */
+div.edit-view {
+	text-align:center;
+}
+/*
  * edit note view
  */
 div.edit-note-pane {
@@ -133,21 +139,24 @@ textarea.textarea {
 	}
 	header.app {
 		padding-right:10px;
-		border-bottom: 1px solid;
 		margin-bottom:10px;
 	}
 	footer.app {
 		border-top: 1px solid;
 	}
 	h1.app-header {
-		text-align:right;
-		font-size:2em;
+		text-align:left;
+		padding-left:10px;
+		padding-bottom:0;
+		vertical-align:sub;
+		font-size:1.5em;
+		border-bottom:1px solid;
 	}
 	/*
 	 * note view
 	 */
 	article.note {
-		margin: 0;
+		margin:10px 0 10px 0;
 		display:inline-block;
 		vertical-align:middle;
 		text-align:left;
@@ -157,6 +166,7 @@ textarea.textarea {
 		box-sizing:border-box;
 	}
 	article.inactive-note {
+		margin:0;
 		width:33.333%;
 		border:0;
 	}
@@ -191,7 +201,7 @@ textarea.textarea {
 	}
 	div.button-input {
 		display:inline-block;
-		vertical-align:bottom;
+		vertical-align:top;
 		margin:0;
 		outline:0;
 		padding:0;
@@ -200,18 +210,15 @@ textarea.textarea {
 		display:block;
 		margin:0;
 		outline:0;
-		border:0;
 		min-height:50px;
 		width:auto;
 		padding: 0 10px 0 10px;
 		min-width:100px;
-		line-height:50px;
-		vertical-align:bottom;
 	}
-	input.b1 {height:100px;font-size:1em;}
-	input.b2 {height:75px;font-size:0.8em;}
-	input.b3 {height:50px;font-size:0.6em;}
-	input.b4 {font-size:0.4em;}
+	input.b1 {min-height:80px;font-size:1em;}
+	input.b2 {min-height:60px;font-size:0.8em;}
+	input.b3 {min-height:40px;font-size:0.6em;}
+	input.b4 {min-height:20px;font-size:0.4em;}
 
 }
 
