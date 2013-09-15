@@ -72,7 +72,12 @@ div.edit-user-pane {
 div.buttons {
 
 }
-div.button-input {text-align:center;border:0;margin:5px;padding:0;}
+div.button-input {
+	text-align:center;
+	border:0;
+	margin:5px;
+	padding:0;
+}
 input.button {
 	display:inline-block;
 	margin:0;
@@ -86,6 +91,28 @@ input.b1 {min-height:75px;width:90%;font-size:1em;}
 input.b2 {min-height:50px;width:80%;font-size:0.8em;}
 input.b3 {min-height:30px;width:70%;font-size:0.6em;}
 input.b4 {min-height:30px;width:60%;font-size:0.4em;}
+/*
+ * dropdowns
+ */
+div.select-input {
+	text-align:center;
+	border:0;
+	margin:5px;
+	padding:0;
+}
+select.dropdown {
+	display:inline-block;
+	margin:0;
+	border:1px solid;
+	width:90%;
+	-webkit-appearance: none;
+	padding:5px;
+	text-align:center;
+	min-height:50px;
+}
+select.dropdown option {
+	text-align:center;
+}
 
 /* 
  * forms 
