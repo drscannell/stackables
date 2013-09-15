@@ -8,18 +8,19 @@ header.app,footer.app {
 	color:#888;
 }
 h1.note {
-	border-color:$buttonColor;
 	color:#000;
 }
 article.note:nth-child(odd) h1.note {
 	background:rgba(200,220,240,0.2);
+}
+article.note:nth-child(even) h1.note {
+	background:rgba(200,220,240,0.0);
 }
 body.not-mobile h1.note:hover {
 	background:$noteColor;
 	color:#FFFFFF;
 }
 article.inactive-note h1.note {
-	border-color:$buttonColor;
 	color:#000;
 }
 

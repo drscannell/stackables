@@ -34,7 +34,11 @@ function main() {
 	 * instantiate
 	 */
 	var notes = new NoteList();
-	var app = new AppView({'collectionToMonitor':notes});
+	var stacks = new StackList();
+	var app = new AppView({
+		'notesCollection':notes,
+		'stacksCollection':stacks
+	});
 }
 
 /*
@@ -128,6 +132,9 @@ var Note = Backbone.Model.extend({
 	url: function(){
 		return '/note?id=' + this.get('_id');
 	},
+	getId: function() {
+		return this.get('_id');
+	},
 	getName: function() {
 		return this.get('name');
 	},
@@ -184,6 +191,9 @@ var Stack = Backbone.Model.extend({
 	},
 	setNotes: function(notes) {
 		this.set('notes', notes);
+	},
+	addNote: function(noteModel) {
+		this.get('notes').push(noteModel.getId());
 	}
 });
 
@@ -219,9 +229,6 @@ var StackDropdownView = Backbone.View.extend({
 	tagName: 'option',
 	className: 'stack',
 	initialize: function(options) {
-		/*
-		 * re-render when model changes
-		 */
 		this.listenTo(this.model, 'change', this.render);
 	},
 	events: {
@@ -235,6 +242,7 @@ var StackDropdownView = Backbone.View.extend({
 			this.remove();
 		} else {
 			var name = this.model.getName();
+			this.$el.attr('value', this.model.getId());
 			this.$el.html(name);
 		}
 		return this; 
@@ -257,7 +265,6 @@ var StackEditView = Backbone.View.extend({
 	},
 	saveAndClose: function(event) {
 		console.log('save and close');
-		// TODO: save to server
 		event.stopPropagation();
 		var name = $('.js-stack-name', this.$el).first().val();
 		var notes = [];
@@ -269,7 +276,7 @@ var StackEditView = Backbone.View.extend({
 				console.log('error');
 			},
 			success:function(model, response, options){
-				console.log('success');
+				console.log('successfully added stack, now adding to user model');
 				console.log(model);
 				options.userModel.addStack(model);
 				options.userModel.save();
@@ -277,7 +284,6 @@ var StackEditView = Backbone.View.extend({
 		});
 		$('#app').show();
 		this.remove();
-		// TODO: if successful, add to user model
 	},
 	archive: function(event) {
 		console.log('archive stack');
@@ -384,9 +390,8 @@ var NoteView = Backbone.View.extend({
 	className: 'note inactive-note',
 	template: _.template( $('#note-template').html() ),
 	initialize: function(options) {
-		/*
-		 * re-render when model changes
-		 */
+		console.log(options);
+		this.stacksCollection = options.stacksCollection;
 		this.listenTo(this.model, 'change', this.render);
 	},
 	events: {
@@ -412,7 +417,12 @@ var NoteView = Backbone.View.extend({
 		if ( this.model.get('_id') ) {
 			this.model.fetch();
 		}
-		var editView = new NoteEditView({'normalView':this, 'model':this.model});
+		console.log('this.stacksCollection: ' + this.stacksCollection);
+		var editView = new NoteEditView({
+			'normalView':this, 
+			'model':this.model,
+			'stacksCollection':this.stacksCollection
+		});
 		$('body').append(editView.render().$el);
 	},
 	render: function() {
@@ -437,14 +447,13 @@ var NoteEditView = Backbone.View.extend({
 	className: 'edit-note-pane',
 	template: _.template( $('#edit-note-template').html() ),
 	initialize: function(options) {
-		/*
-		 * re-render when model changes
-		 */
+		this.stacksCollection = options.stacksCollection;
 		this.listenTo(this.model, 'change', this.render);
 	},
 	events: {
 		'click input.delete': 'deleteNote',
-		'click input.close': 'saveAndCloseNote'
+		'click input.close': 'saveAndCloseNote',
+		'change select.js-add-to-stack-select': 'toggleCollectionMembership'
 	},
 	deleteNote: function(event) {
 		event.stopPropagation();
@@ -452,6 +461,17 @@ var NoteEditView = Backbone.View.extend({
 		this.model.save();
 		$('#app').show();
 		this.remove();
+	},
+	toggleCollectionMembership: function(event) {
+		event.stopPropagation();
+		console.log('toggle collection membership');
+		console.log(event.currentTarget);
+		var selected = $('option', this.$el).filter(':selected');
+		var stackName = $(selected).html();
+		var stackId = $(selected).val();
+		// TODO: crap, just realized we don't have a connection
+		// to the stack model that we need to modify. Need to
+		// 
 	},
 	saveAndCloseNote: function(event) {
 		event.stopPropagation();
@@ -468,6 +488,11 @@ var NoteEditView = Backbone.View.extend({
 		var name = this.model.getName();
 		var markdown = this.model.getMarkdown();
 		this.$el.html(this.template({'name':name, 'markdown':markdown}));
+		var select = $('.js-add-to-stack-select', this.$el);
+		this.stacksCollection.each(function(stack) {
+			var view = new StackDropdownView({'model':stack});
+			$(select).append(view.render().$el);
+		});
 		return this; 
 	}
 });
@@ -481,19 +506,27 @@ var AppView = Backbone.View.extend({
 	initialize: function(options) {
 		this.userModel = new User();
 		this.userModel.fetch();
-		this.collectionToMonitor = options.collectionToMonitor;
-		this.listenTo(this.collectionToMonitor, 'add', this.addNoteView);
+		this.notesCollection = options.notesCollection;
+		this.stacksCollection = options.stacksCollection;
+		this.listenTo(this.notesCollection, 'add', this.addNoteView);
+		this.listenTo(this.stacksCollection, 'add', this.addStackDropdownView);
 		this.listenTo(this.userModel, 'change', this.userChange);
 	},
 	events: {
 		'click input.js-add-note': 'addNewNote',
 		'click input.js-add-stack': 'addNewStack',
 		'click input.js-logout': 'logout',
-		'click input.js-settings': 'showSettingsView'
+		'click input.js-settings': 'showSettingsView',
+		'change select.js-stack-select': 'showStack'
+	},
+	showStack: function(event) {
+		event.stopPropagation();
+		console.log('showStack');
+		console.log(event.currentTarget);
 	},
 	addNewNote: function() {
 		var note = new Note();
-		this.collectionToMonitor.add(note);
+		this.notesCollection.add(note);
 		var view = new NoteEditView({'model':note});
 		$('body').append(view.render().$el);
 	},
@@ -504,8 +537,12 @@ var AppView = Backbone.View.extend({
 		$('body').append(view.render().$el);
 	},
 	addNoteView: function(note) {
-		var view = new NoteView({'model':note});
+		var view = new NoteView({'model':note, 'stacksCollection':this.stacksCollection});
 		$('#notes').prepend(view.render().$el);
+	},
+	addStackDropdownView: function(stack) {
+		var view = new StackDropdownView({'model':stack});
+		$('.js-stack-select').append(view.render().$el);
 	},
 	showSettingsView: function(){
 		var editView = new UserEditView({'model':this.userModel});
