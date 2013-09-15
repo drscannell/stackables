@@ -1,10 +1,28 @@
 
 /* color scheme */
-body               {background:#ffffff;}
-header.app,footer.app      {background:transparent;color:#888;}
-h1.note {background:$buttonColor;color:#FFFFFF;}
-body.not-mobile h1.note:hover {background:$noteColor;color:#FFFFFF;}
-article.inactive-note h1.note    {background:$noteColor;color:#FFFFFF;}
+body {
+	background:#ffffff;
+}
+header.app,footer.app {
+	background:transparent;
+	color:#888;
+}
+h1.note {
+	border-color:$buttonColor;
+	color:#000;
+}
+article.note:nth-child(odd) h1.note {
+	background:rgba(200,220,240,0.2);
+}
+body.not-mobile h1.note:hover {
+	background:$noteColor;
+	color:#FFFFFF;
+}
+article.inactive-note h1.note {
+	border-color:$buttonColor;
+	color:#000;
+}
+
 body.not-mobile article.inactive-note h1.note:hover {background:$buttonColor;color:#FFFFFF;}
 input.button       {border:1px solid #000;color:#000;background:white;}
 body.not-mobile input.button:hover {background:$noteColor;color:#FFFFFF;}

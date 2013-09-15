@@ -175,11 +175,27 @@ var Stack = Backbone.Model.extend({
 	setName: function(name) {
 		this.set('name', name);
 	},
+	getDeleted: function() {
+		//TODO: implement archiving for stacks
+		return false;
+	},
 	getNotes: function() {
 		return this.get('notes');
 	},
 	setNotes: function(notes) {
 		this.set('notes', notes);
+	}
+});
+
+/*
+ * @class StackList
+ * @extends Backbone.Collection
+ */
+var StackList = Backbone.Collection.extend({
+	model: Stack,
+	url: '/stacks',
+	initialize: function(models, options) {
+		this.fetch();
 	}
 });
 
@@ -196,19 +212,34 @@ var NoteList = Backbone.Collection.extend({
 });
 
 /*
- * @class StackList
- * @extends Backbone.Collection
+ * @class StackDropdownView
+ * @extends Backbone.View
  */
-var StackList = Backbone.Collection.extend({
-	model: Note,
-	url: function() {
-		return '/stacks';
+var StackDropdownView = Backbone.View.extend({
+	tagName: 'option',
+	className: 'stack',
+	initialize: function(options) {
+		/*
+		 * re-render when model changes
+		 */
+		this.listenTo(this.model, 'change', this.render);
 	},
-	initialize: function(models, options) {
-		this.fetch();
+	events: {
+		'click': 'showStack'
+	},
+	showStack: function(event) {
+		console.log('show stack ' + this.model.getName());
+	},
+	render: function() {
+		if ( this.model.getDeleted() ) {
+			this.remove();
+		} else {
+			var name = this.model.getName();
+			this.$el.html(name);
+		}
+		return this; 
 	}
 });
-
 /**
  * @class StackEditView
  * @extends Backbone.View

@@ -39,8 +39,13 @@ a.app-footer:hover {text-decoration:underline;}
  * note view
  */
 section.notes {margin:1px 0 1px 0;}
-article.note {margin:1px 0 1px 0;}
-h1.note {font-size:1em;margin:0;padding:10px;border:0;}
+article.note {margin:0;}
+h1.note {
+	font-size:1em;
+	margin:0;
+	padding:10px;
+	border:0;
+}
 section.note-body {
 	margin:0;
 	padding:5px 15px 5px 15px;
@@ -101,17 +106,15 @@ div.select-input {
 	padding:0;
 }
 select.dropdown {
-	display:inline-block;
+	font-size:1em;
+	/*display:inline-block;
 	margin:0;
+	padding:5px;
+	-webkit-appearance: none;
 	border:1px solid;
 	width:90%;
-	-webkit-appearance: none;
-	padding:5px;
 	text-align:center;
-	min-height:50px;
-}
-select.dropdown option {
-	text-align:center;
+	min-height:50px;*/
 }
 
 /* 
