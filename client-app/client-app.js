@@ -234,6 +234,9 @@ var StackDropdownView = Backbone.View.extend({
 	events: {
 		'click': 'showStack'
 	},
+	toggleCollectionMembership: function() {
+		console.log('toggle!');
+	},
 	showStack: function(event) {
 		console.log('show stack ' + this.model.getName());
 	},
@@ -390,7 +393,6 @@ var NoteView = Backbone.View.extend({
 	className: 'note inactive-note',
 	template: _.template( $('#note-template').html() ),
 	initialize: function(options) {
-		console.log(options);
 		this.stacksCollection = options.stacksCollection;
 		this.listenTo(this.model, 'change', this.render);
 	},
@@ -448,6 +450,12 @@ var NoteEditView = Backbone.View.extend({
 	template: _.template( $('#edit-note-template').html() ),
 	initialize: function(options) {
 		this.stacksCollection = options.stacksCollection;
+		this.stackDropdownViews = [];
+		var that = this;
+		this.stacksCollection.each(function(stack) {
+			var view = new StackDropdownView({'model':stack});
+			that.stackDropdownViews.push(view);
+		});
 		this.listenTo(this.model, 'change', this.render);
 	},
 	events: {
@@ -467,11 +475,15 @@ var NoteEditView = Backbone.View.extend({
 		console.log('toggle collection membership');
 		console.log(event.currentTarget);
 		var selected = $('option', this.$el).filter(':selected');
-		var stackName = $(selected).html();
-		var stackId = $(selected).val();
-		// TODO: crap, just realized we don't have a connection
-		// to the stack model that we need to modify. Need to
-		// 
+		for(var i = 0; i < this.stackDropdownViews.length; i++) {
+			var view = this.stackDropdownViews[i];
+			if ($(selected).has(view.$el)) {
+				console.log('match ' + view);
+				view.toggleCollectionMembership();
+			}
+		}
+		//var stackName = $(selected).html();
+		//var stackId = $(selected).val();
 	},
 	saveAndCloseNote: function(event) {
 		event.stopPropagation();
@@ -488,11 +500,10 @@ var NoteEditView = Backbone.View.extend({
 		var name = this.model.getName();
 		var markdown = this.model.getMarkdown();
 		this.$el.html(this.template({'name':name, 'markdown':markdown}));
-		var select = $('.js-add-to-stack-select', this.$el);
-		this.stacksCollection.each(function(stack) {
-			var view = new StackDropdownView({'model':stack});
-			$(select).append(view.render().$el);
-		});
+		for(var i = 0; i < this.stackDropdownViews.length; i++ ) {
+			var view = this.stackDropdownViews[i];
+			$('.js-add-to-stack-select', this.$el).append(view.render().$el);
+		}
 		return this; 
 	}
 });
@@ -527,7 +538,10 @@ var AppView = Backbone.View.extend({
 	addNewNote: function() {
 		var note = new Note();
 		this.notesCollection.add(note);
-		var view = new NoteEditView({'model':note});
+		var view = new NoteEditView({
+			'model':note,
+			'stacksCollection':this.stacksCollection
+		});
 		$('body').append(view.render().$el);
 	},
 	addNewStack: function() {
