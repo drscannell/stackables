@@ -438,7 +438,7 @@ function getAllNotes(req, res, attempts) {
 	var userObjectId = stackables.getUserObjectIdFromCookie(req);
 	var query = {'deleted':false, 'createdby':userObjectId};
 	console.log('  get all notes created by ' + query.createdby);
-	Note.find( query, function(err, notes) {
+	Note.find( query,undefined,{sort:{'_id':1}}, function(err, notes) {
 		if(!err) {
 			console.log('  Retrieved ' + notes.length + ' notes from mongo');
 			res.send(notes);

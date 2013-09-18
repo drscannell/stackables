@@ -234,8 +234,10 @@ var StackDropdownView = Backbone.View.extend({
 	events: {
 		'click': 'showStack'
 	},
-	toggleCollectionMembership: function() {
-		console.log('toggle!');
+	addNote: function(noteModel) {
+		console.log('add note!');
+		this.model.addNote(noteModel);
+		
 	},
 	showStack: function(event) {
 		console.log('show stack ' + this.model.getName());
@@ -474,12 +476,15 @@ var NoteEditView = Backbone.View.extend({
 		event.stopPropagation();
 		console.log('toggle collection membership');
 		console.log(event.currentTarget);
-		var selected = $('option', this.$el).filter(':selected');
+		var selected = $('option', this.$el).filter(':selected').get(0);
+		console.log('selected:');
+		console.log(selected);
 		for(var i = 0; i < this.stackDropdownViews.length; i++) {
 			var view = this.stackDropdownViews[i];
-			if ($(selected).has(view.$el)) {
-				console.log('match ' + view);
-				view.toggleCollectionMembership();
+			if (selected === $(view.$el).get(0)) {
+				console.log('match');
+				console.log(view.$el);
+				view.addNote(this.model);
 			}
 		}
 		//var stackName = $(selected).html();
