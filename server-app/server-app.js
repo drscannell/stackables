@@ -183,16 +183,20 @@ app.post('/stack', function(req, res){
 	if ( '_id' in req.body ) {
 		stackables.updateStack(req.body, function(err, stack) {
 			if (!err) {
+				console.log('  Successfully updated stack');
 				res.status(200).send(stack);
 			} else {
+				console.log('  Failed to update stack');
 				res.status(501).send(err);
 			}
 		});
 	} else {
 		stackables.addStack(req.body, function(err, stack) {
 			if (!err) {
+				console.log('  Successfully added stack');
 				res.status(200).send(stack);
 			} else {
+				console.log('  Failed to add stack');
 				res.status(501).send(err);
 			}
 		});
