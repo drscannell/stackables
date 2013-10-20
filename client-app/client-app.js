@@ -199,9 +199,9 @@ var Stack = Backbone.Model.extend({
 		console.log('Stack.toggleNoteMembership');
 		var noteId = noteModel.getId();
 		var notes = this.get('notes')
-		var index = notes.indexOf(noteId) == -1;
+		var index = notes.indexOf(noteId);
 		if (index == -1) {
-			notes.push(idToAdd);
+			notes.push(noteId);
 		} else {
 			notes.splice(index, 1);
 		}
@@ -235,6 +235,8 @@ var NoteList = Backbone.Collection.extend({
 	model: Note,
 	url: '/notes',
 	initialize: function(models, options) {
+		console.log('new collection options');
+		console.log(options);
 		this.fetch();
 	}
 });
@@ -256,11 +258,13 @@ var StackDropdownView = Backbone.View.extend({
 		console.log('StackDropdownView.toggleNoteMembership');
 		this.model.toggleNoteMembership(noteModel);
 		this.model.save(undefined, {
+			'thisView':this,
 			error:function(){
 				console.log('failed to update stack');
 			},
 			success:function(model, response, options){
 				console.log('successfully updated stack');
+				options.thisView.render();
 			}
 		});
 	},
@@ -573,6 +577,10 @@ var AppView = Backbone.View.extend({
 		event.stopPropagation();
 		console.log('showStack');
 		console.log(event.currentTarget);
+		$('#notes').empty();
+		// TODO: need to get id of selected stack
+		this.notesCollection = new NoteList([], {'stackId':'bang'});
+		this.listenTo(this.notesCollection, 'add', this.addNoteView);
 	},
 	addNewNote: function() {
 		var note = new Note();
