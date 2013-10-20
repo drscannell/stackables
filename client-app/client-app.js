@@ -34,7 +34,11 @@ function main() {
 	 * instantiate
 	 */
 	var notes = new NoteList();
-	var app = new AppView({'collectionToMonitor':notes});
+	var stacks = new StackList();
+	var app = new AppView({
+		'notesCollection':notes,
+		'stacksCollection':stacks
+	});
 }
 
 /*
@@ -128,6 +132,9 @@ var Note = Backbone.Model.extend({
 	url: function(){
 		return '/note?id=' + this.get('_id');
 	},
+	getId: function() {
+		return this.get('_id');
+	},
 	getName: function() {
 		return this.get('name');
 	},
@@ -151,8 +158,12 @@ var Note = Backbone.Model.extend({
 	getDeleted: function() {
 		return this.get('deleted');
 	},
-	setDeleted: function(newDeleted) {
-		this.set('deleted', newDeleted);
+	setDeleted: function() {
+		if (this.getDeleted()) {
+			this.set('deleted', false);
+		} else {
+			this.set('deleted', true);
+		}
 	}
 });
 
@@ -165,7 +176,10 @@ var Stack = Backbone.Model.extend({
 		'name':'Untitled Stack',
 		'notes':[]
 	},
-	url: '/stack',
+	//url: '/stack',
+	url: function(){
+		return '/stack?id=' + this.get('_id');
+	},
 	getId: function() {
 		return this.get('_id');
 	},
@@ -175,11 +189,45 @@ var Stack = Backbone.Model.extend({
 	setName: function(name) {
 		this.set('name', name);
 	},
+	getDeleted: function() {
+		//TODO: implement archiving for stacks
+		return false;
+	},
 	getNotes: function() {
 		return this.get('notes');
 	},
 	setNotes: function(notes) {
 		this.set('notes', notes);
+	},
+	toggleNoteMembership: function(noteModel) {
+		console.log('Stack.toggleNoteMembership');
+		var noteId = noteModel.getId();
+		var notes = this.get('notes')
+		var index = notes.indexOf(noteId);
+		if (index == -1) {
+			notes.push(noteId);
+		} else {
+			notes.splice(index, 1);
+		}
+	},
+	hasNote: function(noteId) {
+		var notes = this.get('notes')
+		if (notes.indexOf(noteId) == -1) {
+			return false;
+		}
+		return true;
+	}
+});
+
+/*
+ * @class StackList
+ * @extends Backbone.Collection
+ */
+var StackList = Backbone.Collection.extend({
+	model: Stack,
+	url: '/stacks',
+	initialize: function(models, options) {
+		this.fetch();
 	}
 });
 
@@ -189,26 +237,71 @@ var Stack = Backbone.Model.extend({
  */
 var NoteList = Backbone.Collection.extend({
 	model: Note,
-	url: '/notes',
+	url: function() {
+		if (this.stackId) {
+			return '/notes?stackId=' + this.stackId;
+		} else {
+			return '/notes';
+		}
+	},
 	initialize: function(models, options) {
+		this.stackId = null;
+		if (options && 'stackId' in options) {
+			this.stackId = options.stackId;
+		}
 		this.fetch();
 	}
 });
 
 /*
- * @class StackList
- * @extends Backbone.Collection
+ * @class StackDropdownView
+ * @extends Backbone.View
  */
-var StackList = Backbone.Collection.extend({
-	model: Note,
-	url: function() {
-		return '/stacks';
+var StackDropdownView = Backbone.View.extend({
+	tagName: 'option',
+	className: 'stack',
+	initialize: function(options) {
+		this.listenTo(this.model, 'change', this.render);
 	},
-	initialize: function(models, options) {
-		this.fetch();
+	toggleNoteMembership: function(noteModel) {
+		console.log('StackDropdownView.toggleNoteMembership');
+		this.model.toggleNoteMembership(noteModel);
+		this.model.save(undefined, {
+			'thisView':this,
+			error:function(){
+				console.log('failed to update stack');
+			},
+			success:function(model, response, options){
+				console.log('successfully updated stack');
+				options.thisView.render();
+			}
+		});
+	},
+	setChecked: function(shouldCheck) {
+		this.options.isChecked = shouldCheck;
+	},
+	isSelected: function() {
+		console.log('StackDropdownView.isSelected()');
+		console.log(this.$el.get(0));
+		return this.$el.attr('selected');
+	},
+	render: function() {
+		if ( this.model.getDeleted() ) {
+			this.remove();
+		} else {
+			var name = this.model.getName();
+			var display = name;
+			if ('isChecked' in this.options && this.options.isChecked) {
+				display = '+ ' + display;
+			} else if ('isChecked' in this.options) {
+				display = '- ' + display;
+			}
+			this.$el.attr('value', this.model.getId());
+			this.$el.html(display);
+		}
+		return this; 
 	}
 });
-
 /**
  * @class StackEditView
  * @extends Backbone.View
@@ -226,7 +319,6 @@ var StackEditView = Backbone.View.extend({
 	},
 	saveAndClose: function(event) {
 		console.log('save and close');
-		// TODO: save to server
 		event.stopPropagation();
 		var name = $('.js-stack-name', this.$el).first().val();
 		var notes = [];
@@ -238,7 +330,7 @@ var StackEditView = Backbone.View.extend({
 				console.log('error');
 			},
 			success:function(model, response, options){
-				console.log('success');
+				console.log('successfully added stack, now adding to user model');
 				console.log(model);
 				options.userModel.addStack(model);
 				options.userModel.save();
@@ -246,7 +338,6 @@ var StackEditView = Backbone.View.extend({
 		});
 		$('#app').show();
 		this.remove();
-		// TODO: if successful, add to user model
 	},
 	archive: function(event) {
 		console.log('archive stack');
@@ -353,10 +444,10 @@ var NoteView = Backbone.View.extend({
 	className: 'note inactive-note',
 	template: _.template( $('#note-template').html() ),
 	initialize: function(options) {
-		/*
-		 * re-render when model changes
-		 */
+		this.stacksCollection = options.stacksCollection;
 		this.listenTo(this.model, 'change', this.render);
+		this.showUnarchivedNotes = options.showUnarchivedNotes;
+		this.showArchivedNotes = options.showArchivedNotes;
 	},
 	events: {
 		'click input.delete': 'deleteNote',
@@ -381,11 +472,19 @@ var NoteView = Backbone.View.extend({
 		if ( this.model.get('_id') ) {
 			this.model.fetch();
 		}
-		var editView = new NoteEditView({'normalView':this, 'model':this.model});
+		console.log('this.stacksCollection: ' + this.stacksCollection);
+		var editView = new NoteEditView({
+			'normalView':this, 
+			'model':this.model,
+			'stacksCollection':this.stacksCollection
+		});
 		$('body').append(editView.render().$el);
 	},
 	render: function() {
-		if ( this.model.getDeleted() ) {
+		var isArchived = this.model.getDeleted();
+		if ( isArchived && !this.showArchivedNotes ) {
+			this.remove();
+		} else if (!isArchived && !this.showUnarchivedNotes) {
 			this.remove();
 		} else {
 			var name = this.model.getName();
@@ -406,37 +505,93 @@ var NoteEditView = Backbone.View.extend({
 	className: 'edit-note-pane',
 	template: _.template( $('#edit-note-template').html() ),
 	initialize: function(options) {
-		/*
-		 * re-render when model changes
-		 */
+		this.stacksCollection = options.stacksCollection;
+		this.stackDropdownViews = [];
+		var that = this;
+		// create subview for each stack in list
+		this.stacksCollection.each(function(stack) {
+			var view = new StackDropdownView({'model':stack});
+			that.stackDropdownViews.push(view);
+		});
 		this.listenTo(this.model, 'change', this.render);
 	},
 	events: {
 		'click input.delete': 'deleteNote',
-		'click input.close': 'saveAndCloseNote'
+		'click input.close': 'saveAndCloseNote',
+		'change select.js-add-to-stack-select': 'toggleCollectionMembership'
 	},
 	deleteNote: function(event) {
 		event.stopPropagation();
-		this.model.setDeleted(true);
-		this.model.save();
-		$('#app').show();
-		this.remove();
+		var view = this;
+		this.model.setDeleted();
+		this.saveNote(function(err, success) {
+			$('#app').show();
+			view.remove();
+		});
 	},
-	saveAndCloseNote: function(event) {
+	toggleCollectionMembership: function(event) {
 		event.stopPropagation();
+		console.log('NoteEditView.toggleCollectionMembership');
+		var view = this;
+		this.saveNote(function(err, success) {
+			if (!err) {
+				var selected = $('option', view.$el).filter(':selected').get(0);
+				console.log('selected:');
+				console.log(selected);
+				// which stack view was interacted with?
+				for(var i = 0; i < view.stackDropdownViews.length; i++) {
+					var stackDropdownView = view.stackDropdownViews[i];
+					if (selected === $(stackDropdownView.$el).get(0)) {
+						console.log('  Invoking method of subview');
+						stackDropdownView.toggleNoteMembership(view.model);
+						view.render();
+					}
+				}
+			}	
+		});
+	},
+	saveNote: function(callback) {
+		console.log('Attempting to save note');
 		var name = $('.edit-name', this.$el).first().val();
 		var markdown = $('.edit-markdown', this.$el).first().val();
 		this.model.setName(name);
 		this.model.setMarkdown(markdown);
-		this.model.save();
-		$('#app').show();
-		this.remove();
+		this.model.save(undefined,{
+			error:function(model, xhr, options) {
+				console.log('Failed to save note');
+				console.log(xhr);
+				callback('Failed to save note', false);
+			},
+			success:function(model, response, options){
+				console.log('Successfully saved note');
+				callback(null, true);
+			}
+		});
+	},
+	saveAndCloseNote: function(event) {
+		event.stopPropagation();
+		var view = this;
+		this.saveNote(function(err, success) {
+			
+			$('#app').show();
+			view.remove();
+		});
 	},
 	render: function() {
+		console.log('render');
 		$('#app').hide();
 		var name = this.model.getName();
 		var markdown = this.model.getMarkdown();
-		this.$el.html(this.template({'name':name, 'markdown':markdown}));
+		var isArchived = this.model.getDeleted();
+		this.$el.html(this.template({'name':name, 'markdown':markdown, 'isArchived':isArchived}));
+		for(var i = 0; i < this.stackDropdownViews.length; i++ ) {
+			var view = this.stackDropdownViews[i];
+			var stackModel = view.model;
+			var noteId = this.model.getId();
+			var shouldCheck = stackModel.hasNote(noteId);
+			view.setChecked(shouldCheck);
+			$('.js-add-to-stack-select', this.$el).append(view.render().$el);
+		}
 		return this; 
 	}
 });
@@ -448,22 +603,38 @@ var NoteEditView = Backbone.View.extend({
 var AppView = Backbone.View.extend({
 	el: $('#app'),
 	initialize: function(options) {
+		this.stackViews = [];
 		this.userModel = new User();
 		this.userModel.fetch();
-		this.collectionToMonitor = options.collectionToMonitor;
-		this.listenTo(this.collectionToMonitor, 'add', this.addNoteView);
+		this.notesCollection = options.notesCollection;
+		this.stacksCollection = options.stacksCollection;
+		this.listenTo(this.notesCollection, 'add', this.addNoteView);
+		this.listenTo(this.stacksCollection, 'add', this.addStackDropdownView);
 		this.listenTo(this.userModel, 'change', this.userChange);
+		this.isShowingArchive = false;
 	},
 	events: {
 		'click input.js-add-note': 'addNewNote',
 		'click input.js-add-stack': 'addNewStack',
 		'click input.js-logout': 'logout',
-		'click input.js-settings': 'showSettingsView'
+		'click input.js-settings': 'showSettingsView',
+		'change select.js-stack-select': 'showStack'
+	},
+	showStack: function(event) {
+		event.stopPropagation();
+		$('#notes').empty();
+		var stackId = $(event.currentTarget).val();
+		this.isShowingArchive = (stackId == 'archived');
+		this.notesCollection = new NoteList([], {'stackId':stackId});
+		this.listenTo(this.notesCollection, 'add', this.addNoteView);
 	},
 	addNewNote: function() {
 		var note = new Note();
-		this.collectionToMonitor.add(note);
-		var view = new NoteEditView({'model':note});
+		this.notesCollection.add(note);
+		var view = new NoteEditView({
+			'model':note,
+			'stacksCollection':this.stacksCollection
+		});
 		$('body').append(view.render().$el);
 	},
 	addNewStack: function() {
@@ -473,8 +644,18 @@ var AppView = Backbone.View.extend({
 		$('body').append(view.render().$el);
 	},
 	addNoteView: function(note) {
-		var view = new NoteView({'model':note});
+		var view = new NoteView({
+			'model':note, 
+			'stacksCollection':this.stacksCollection,
+			'showUnarchivedNotes':(this.isShowingArchive == false),
+			'showArchivedNotes':(this.isShowingArchive == true)
+		});
 		$('#notes').prepend(view.render().$el);
+	},
+	addStackDropdownView: function(stack) {
+		var view = new StackDropdownView({'model':stack});
+		$('.js-stack-select').append(view.render().$el);
+		this.stackViews.push(view);
 	},
 	showSettingsView: function(){
 		var editView = new UserEditView({'model':this.userModel});

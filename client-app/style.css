@@ -29,7 +29,7 @@ a {text-decoration:none;word-wrap:break-word;}
  * App header/footer
  */
 div.app {margin:0;padding:0;outline:0;border:0;background:white;}
-header.app {padding:10px 0 10px 0;margin:0;overflow:hidden;}
+header.app {padding:10px 0 10px 0;margin:0;overflow:hidden;font-size:1em;}
 h1.app-header {text-align:center;margin:5px;font-size:1em;font-weight:normal;}
 footer.app {padding:10px 0 10px 0;margin:10px 0 0 0;border-top:1px solid;overflow:hidden;font-size:0.8em;}
 h1.app-footer {text-align:center;margin:5px;font-size:1em;font-weight:normal;}
@@ -39,11 +39,16 @@ a.app-footer:hover {text-decoration:underline;}
  * note view
  */
 section.notes {margin:1px 0 1px 0;}
-article.note {margin:1px 0 1px 0;}
-h1.note {font-size:1em;margin:0;padding:10px;border:0;}
+article.note {margin:0;}
+h1.note {
+	font-size:1em;
+	margin:0;
+	padding:10px;
+	border:0;
+}
 section.note-body {
 	margin:0;
-	padding:5px 15px 5px 15px;
+	padding:5px 15px 50px 15px;
 }
 article.inactive-note > section.note-body {
 	display:none;
@@ -70,22 +75,58 @@ div.edit-user-pane {
  * buttons 
  */
 div.buttons {
-
+	text-align:center;
 }
-div.button-input {text-align:center;border:0;margin:5px;padding:0;}
+div.note-view-buttons {
+	text-align:right;
+}
+div.button-input {
+	text-align:center;
+	border:0;
+	margin:5px;
+	padding:0;
+}
 input.button {
 	display:inline-block;
-	margin:0;
+	margin:1px 0 1px 0;
 	border:0;
-	min-height:50px;
-	width:90%;
+	height:50px;
+	width:90%;width:40%;
 	border-radius:5px;
 	-webkit-appearance: none;
 }
-input.b1 {min-height:75px;width:90%;font-size:1em;}
-input.b2 {min-height:50px;width:80%;font-size:0.8em;}
-input.b3 {min-height:30px;width:70%;font-size:0.6em;}
-input.b4 {min-height:30px;width:60%;font-size:0.4em;}
+input.b1 {height:50px;width:45%;font-size:1em;}
+input.b2 {height:50px;width:45%;font-size:1em;}
+input.b3 {height:50px;width:45%;font-size:1em;}
+input.b4 {height:50px;width:45%;font-size:1em;}
+input.edit-note-button {
+	height:35px;
+	width:100px;
+	box-sizing:border-box;
+}
+/*
+ * dropdowns
+ */
+div.select-input {
+	text-align:center;
+	border:0;
+	margin:5px;
+	padding:0;
+}
+select.dropdown {
+	font-size:0.8em;
+	-webkit-appearance: none;
+	padding:5px;
+	width:80%;
+	/*display:inline-block;
+	margin:0;
+	padding:5px;
+	-webkit-appearance: none;
+	border:1px solid;
+	width:90%;
+	text-align:center;
+	min-height:50px;*/
+}
 
 /* 
  * forms 
@@ -199,7 +240,7 @@ textarea.textarea {
 		text-align:right;
 		padding:5px;
 	}
-	div.button-input {
+	.button-input {
 		display:inline-block;
 		vertical-align:top;
 		margin:0;
@@ -207,7 +248,7 @@ textarea.textarea {
 		padding:0;
 	}
 	input.button {
-		display:block;
+		display:inline-block;
 		margin:0;
 		outline:0;
 		min-height:50px;
@@ -215,10 +256,10 @@ textarea.textarea {
 		padding: 0 10px 0 10px;
 		min-width:100px;
 	}
-	input.b1 {min-height:80px;font-size:1em;}
-	input.b2 {min-height:60px;font-size:0.8em;}
-	input.b3 {min-height:40px;font-size:0.6em;}
-	input.b4 {min-height:20px;font-size:0.4em;}
+	input.b1 {min-height:80px;min-width:200px;font-size:1em;}
+	input.b2 {min-height:60px;min-width:100px;font-size:0.8em;}
+	input.b3 {min-height:40px;min-width:75px;font-size:0.6em;}
+	input.b4 {min-height:20px;min-width:50px;font-size:0.4em;}
 
 }
 
