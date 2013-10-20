@@ -233,10 +233,18 @@ var StackList = Backbone.Collection.extend({
  */
 var NoteList = Backbone.Collection.extend({
 	model: Note,
-	url: '/notes',
+	url: function() {
+		if (this.stackId) {
+			return '/notes?stackId=' + this.stackId;
+		} else {
+			return '/notes';
+		}
+	},
 	initialize: function(models, options) {
-		console.log('new collection options');
-		console.log(options);
+		this.stackId = null;
+		if (options && 'stackId' in options) {
+			this.stackId = options.stackId;
+		}
 		this.fetch();
 	}
 });
@@ -250,9 +258,6 @@ var StackDropdownView = Backbone.View.extend({
 	className: 'stack',
 	initialize: function(options) {
 		this.listenTo(this.model, 'change', this.render);
-	},
-	events: {
-		'click': 'showStack'
 	},
 	toggleNoteMembership: function(noteModel) {
 		console.log('StackDropdownView.toggleNoteMembership');
@@ -268,11 +273,13 @@ var StackDropdownView = Backbone.View.extend({
 			}
 		});
 	},
-	showStack: function(event) {
-		console.log('show stack ' + this.model.getName());
-	},
 	setChecked: function(shouldCheck) {
 		this.options.isChecked = shouldCheck;
+	},
+	isSelected: function() {
+		console.log('StackDropdownView.isSelected()');
+		console.log(this.$el.get(0));
+		return this.$el.attr('selected');
 	},
 	render: function() {
 		if ( this.model.getDeleted() ) {
@@ -558,6 +565,7 @@ var NoteEditView = Backbone.View.extend({
 var AppView = Backbone.View.extend({
 	el: $('#app'),
 	initialize: function(options) {
+		this.stackViews = [];
 		this.userModel = new User();
 		this.userModel.fetch();
 		this.notesCollection = options.notesCollection;
@@ -575,11 +583,9 @@ var AppView = Backbone.View.extend({
 	},
 	showStack: function(event) {
 		event.stopPropagation();
-		console.log('showStack');
-		console.log(event.currentTarget);
 		$('#notes').empty();
-		// TODO: need to get id of selected stack
-		this.notesCollection = new NoteList([], {'stackId':'bang'});
+		var stackId = $(event.currentTarget).val();
+		this.notesCollection = new NoteList([], {'stackId':stackId});
 		this.listenTo(this.notesCollection, 'add', this.addNoteView);
 	},
 	addNewNote: function() {
@@ -604,6 +610,7 @@ var AppView = Backbone.View.extend({
 	addStackDropdownView: function(stack) {
 		var view = new StackDropdownView({'model':stack});
 		$('.js-stack-select').append(view.render().$el);
+		this.stackViews.push(view);
 	},
 	showSettingsView: function(){
 		var editView = new UserEditView({'model':this.userModel});

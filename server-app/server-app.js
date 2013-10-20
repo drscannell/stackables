@@ -153,7 +153,22 @@ app.post('/logout', function(req, res){
 /* --- data endpoints --- */
 
 app.get('/notes', function(req, res) {
-	getAllNotes(req, res, 1);
+	var stackId = ('stackId' in req.query) ? req.query.stackId : null;
+	if(stackId && stackId != 'all' && stackId != 'archived') {
+		stackables.getNotesByStackId(req.query.stackId, function(err, data) {
+			if (!err) {
+				res.status(200).send(data);
+			} else {
+				res.status(501).send(err);
+			}
+		});
+	} else if (stackId && stackId == 'archived') {
+		console.log('  requested archived notes');
+		getAllNotes(req, res, 1);
+	} else {
+		console.log('  No stack id specified.');
+		getAllNotes(req, res, 1);
+	}
 });
 
 app.get('/note', function(req, res) {
@@ -386,6 +401,19 @@ stackables.getStacksByIdArray = function(idArray, callback) {
 	});
 };
 
+/**
+ * @function getStackById
+ */
+stackables.getStackById = function(id, callback) {
+	Stack.findById(id, function(err, data) {
+		if (!err) {
+			callback(null, data);
+		} else {
+			console.log(err);
+			callback({'error':'Unable to find stack in database'}, null);
+		}
+	});
+};
 /*
  * Add a single note
  */
@@ -453,6 +481,35 @@ function getAllNotes(req, res, attempts) {
 	});
 }
 
+stackables.getNotesByStackId = function(stackId, callback) {
+	console.log('  Fetch notes in stack ' + stackId);
+	stackables.getStackById(stackId, function(err, stack) {
+		if (!err) {
+			console.log('  Retrieved stack');
+			console.log(stack.notes);
+			stackables.getNotesByIdArray(stack.notes, function(err, notes) {
+				if (!err) {
+					callback(null, notes);
+				} else {
+					callback(err, null);
+				}
+			});
+		} else {
+			callback(err, null);
+		}
+	});
+};
+
+stackables.getNotesByIdArray = function(idArray, callback) {
+	Note.find({'_id': {$in:idArray}},undefined,{sort:{'_id':1}}, function(err, notes) {
+		if (!err) {
+			callback(null, notes);
+		} else {
+			console.log(err);
+			callback({'error':'Unable to find notes in database'}, null);
+		}
+	});
+};
 /**
  * Get note from database
  */
