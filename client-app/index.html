@@ -14,18 +14,10 @@
 			<header class="app">
 				<h1 class="app-header">stackabl.es</h1>
 				<div class="buttons">
-					<div class="button-input">
-						<input type="button" class="button b3 js-logout" value="logout" />
-					</div>
-					<div class="button-input">
-						<input type="button" class="button b2 js-settings" value="settings" />
-					</div>
-					<div class="button-input">
-						<input type="button" class="button b2 js-add-stack" value="add stack" />
-					</div>
-					<div class="button-input">
-						<input type="button" class="button b1 js-add-note" value="add note" />
-					</div>
+						<span class="button-input"><input type="button" class="button b3 js-logout" value="logout" /></span>
+						<span class="button-input"><input type="button" class="button b2 js-settings" value="settings" /></span>
+						<span class="button-input"><input type="button" class="button b2 js-add-stack" value="add stack" /></span>
+						<span class="button-input"><input type="button" class="button b1 js-add-note" value="add note" /></span>
 					<div class="select-input">
 						<select class="dropdown js-stack-select">
 							<option value="all">All Notes</option>
@@ -47,10 +39,10 @@
 		<script type="text/template" id="note-template">
 			<h1 class="note"><span><%- name %></span></h1>
 			<section class="note-body inactive-note">
-				<div class="buttons">
-					<div class="button-input">
+				<div class="note-view-buttons">
+					<span class="button-input">
 						<input type="button" class="button b3 edit" value="edit" />
-					</div>
+					</span>
 				</div>
 			</section>
 		</script>

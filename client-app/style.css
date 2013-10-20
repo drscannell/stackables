@@ -48,7 +48,7 @@ h1.note {
 }
 section.note-body {
 	margin:0;
-	padding:5px 15px 5px 15px;
+	padding:5px 15px 50px 15px;
 }
 article.inactive-note > section.note-body {
 	display:none;
@@ -75,7 +75,10 @@ div.edit-user-pane {
  * buttons 
  */
 div.buttons {
-
+	text-align:center;
+}
+div.note-view-buttons {
+	text-align:right;
 }
 div.button-input {
 	text-align:center;
@@ -88,14 +91,14 @@ input.button {
 	margin:0;
 	border:0;
 	min-height:50px;
-	width:90%;
+	width:90%;width:40%;
 	border-radius:5px;
 	-webkit-appearance: none;
 }
-input.b1 {min-height:75px;width:90%;font-size:1em;}
-input.b2 {min-height:50px;width:80%;font-size:0.8em;}
-input.b3 {min-height:30px;width:70%;font-size:0.6em;}
-input.b4 {min-height:30px;width:60%;font-size:0.4em;}
+input.b1 {min-height:75px;min-height:50px;width:90%;width:45%;font-size:1em;}
+input.b2 {min-height:50px;min-height:50px;width:80%;width:45%;font-size:0.8em;}
+input.b3 {min-height:30px;min-height:50px;width:70%;width:45%;font-size:0.6em;}
+input.b4 {min-height:30px;min-height:50px;width:60%;width:45%;font-size:0.4em;}
 /*
  * dropdowns
  */
@@ -231,7 +234,7 @@ textarea.textarea {
 		text-align:right;
 		padding:5px;
 	}
-	div.button-input {
+	.button-input {
 		display:inline-block;
 		vertical-align:top;
 		margin:0;
@@ -239,7 +242,7 @@ textarea.textarea {
 		padding:0;
 	}
 	input.button {
-		display:block;
+		display:inline-block;
 		margin:0;
 		outline:0;
 		min-height:50px;
@@ -247,10 +250,10 @@ textarea.textarea {
 		padding: 0 10px 0 10px;
 		min-width:100px;
 	}
-	input.b1 {min-height:80px;font-size:1em;}
-	input.b2 {min-height:60px;font-size:0.8em;}
-	input.b3 {min-height:40px;font-size:0.6em;}
-	input.b4 {min-height:20px;font-size:0.4em;}
+	input.b1 {min-height:80px;width:80px;font-size:1em;}
+	input.b2 {min-height:60px;width:60px;font-size:0.8em;}
+	input.b3 {min-height:40px;width:40px;font-size:0.6em;}
+	input.b4 {min-height:20px;width:20px;font-size:0.4em;}
 
 }
 

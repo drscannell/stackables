@@ -11,10 +11,10 @@ h1.note {
 	color:#000;
 }
 article.note:nth-child(odd) h1.note {
-	background:rgba(200,220,240,0.2);
+	background:rgba(200,220,240,0.4);
 }
 article.note:nth-child(even) h1.note {
-	background:rgba(200,220,240,0.0);
+	background:rgba(200,220,240,0.2);
 }
 body.not-mobile h1.note:hover {
 	background:$noteColor;
@@ -25,11 +25,17 @@ article.inactive-note h1.note {
 }
 
 body.not-mobile article.inactive-note h1.note:hover {background:$buttonColor;color:#FFFFFF;}
-input.button       {border:1px solid #000;color:#000;background:white;}
+input.button       {border:1px solid;background:white;color:rgba(160,180,200,1);}
 body.not-mobile input.button:hover {background:$noteColor;color:#FFFFFF;}
 
 
 @media screen and (min-width:800px) {
+	article.note:nth-child(odd) h1.note {
+		background:rgba(200,220,240,0.0);
+	}
+	article.note:nth-child(even) h1.note {
+		background:rgba(200,220,240,0.0);
+	}
 	header.app,footer.app {background:#FFFFFF;color:#888;font-weight:bold;}
 	h1.note {background:transparent;margin-left:10px;margin-right:10px;color:#000;font-size:1.5em;border-bottom:1px solid #888;border-radius:0px;}
 	body.not-mobile h1.note:hover {background:transparent;color:#888;}
