@@ -164,7 +164,7 @@ app.get('/notes', function(req, res) {
 		});
 	} else if (stackId && stackId == 'archived') {
 		console.log('  requested archived notes');
-		getAllNotes(req, res, 1);
+		getAllArchivedNotes(req, res, 1);
 	} else {
 		console.log('  No stack id specified.');
 		getAllNotes(req, res, 1);
@@ -425,11 +425,10 @@ function addNote(req, res) {
 	newNote.save(function(err, note) {
 		if (!err) {
 			console.log('  successfully added note');
-			res.status(200);
-			res.send(note);
+			res.status(200).send(note);
 		} else {
 			console.log(err);
-			res.send(500);
+			res.status(501).send({'error':err});
 		}
 	});
 }
@@ -452,10 +451,10 @@ function updateNote(req, res) {
 	Note.findByIdAndUpdate(noteId, req.body, function(err, doc) {
 		if (!err) {
 			console.log('  successfully updated');
-			res.send(200);
+			res.status(200).send(doc);
 		} else {
 			console.log(err);
-			res.send(500);
+			res.status(501).send({'error':err});
 		}
 	});
 }
@@ -481,6 +480,21 @@ function getAllNotes(req, res, attempts) {
 	});
 }
 
+function getAllArchivedNotes(req, res, attempts) {
+	var userObjectId = stackables.getUserObjectIdFromCookie(req);
+	var query = {'deleted':true, 'createdby':userObjectId};
+	console.log('  get all notes created by ' + query.createdby);
+	Note.find( query,undefined,{sort:{'_id':1}}, function(err, notes) {
+		if(!err) {
+			console.log('  Retrieved ' + notes.length + ' archived notes from mongo');
+			res.send(notes);
+		} else {
+			res.status(501);
+			res.send({'error':'Failed to retrieve data from database.'});
+		}
+	});
+}
+
 stackables.getNotesByStackId = function(stackId, callback) {
 	console.log('  Fetch notes in stack ' + stackId);
 	stackables.getStackById(stackId, function(err, stack) {
@@ -489,7 +503,13 @@ stackables.getNotesByStackId = function(stackId, callback) {
 			console.log(stack.notes);
 			stackables.getNotesByIdArray(stack.notes, function(err, notes) {
 				if (!err) {
-					callback(null, notes);
+					var unarchivedNotes = [];
+					for (var i = 0; i < notes.length; i++) {
+						if(!notes[i].deleted) {
+							unarchivedNotes.push(notes[i]);
+						}
+					}
+					callback(null, unarchivedNotes);
 				} else {
 					callback(err, null);
 				}
