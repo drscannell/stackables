@@ -1,156 +1,154 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <title>stackables</title>
 <meta charset="utf-8" />
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<link rel="stylesheet" href="style.css" />
 <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,400italic,600italic' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="style.css" />
 <link rel="stylesheet" href="style-colors.css" />
 </head>
 <body>
-	<div class="app" id="app">
-		<header class="app">
-			<h1 class="app-header">stackabl.es</h1>
-			<div class="buttons">
-				<span class="button-input"><input type="button" class="button b3 js-logout" value="logout" /></span>
-				<span class="button-input"><input type="button" class="button b2 js-settings" value="settings" /></span>
-				<span class="button-input"><input type="button" class="button b2 js-add-stack" value="add stack" /></span>
-				<span class="button-input"><input type="button" class="button b1 js-add-note" value="add note" /></span>
-				<hr class="rule" />
-				<div class="select-input">
-					<select class="dropdown js-stack-select">
-						<option value="all">All Notes</option>
-						<option value="archived">Archived Notes</option>
-					</select>
-				</div>
+<div class="app" id="app">
+	<header class="app">
+		<h1 class="app-header">stackabl.es</h1>
+		<div class="buttons">
+			<input type="button" 
+				class="button js-logout" value="logout" />
+			<input type="button" 
+				class="button js-settings" value="settings" />
+			<input type="button" 
+				class="button js-add-stack" value="add stack" />
+			<input type="button" 
+				class="button js-add-note" value="add note" />
+			<hr class="rule" />
+			<div class="select-input">
+				<select class="dropdown js-stack-select">
+					<option value="all">All Notes</option>
+					<option value="archived">Archived Notes</option>
+				</select>
 			</div>
-		</header>
-		<section class="notes" id="notes">
-			<!-- notes will be inserted here -->	
-		</section>
-		<footer class="app">
-			 <h1 class="app-footer">
-				<a class="app-footer" href="http://expressjs.com/">express</a> | 
-				<a class="app-footer" href="http://backbonejs.org/">backbone</a> | 
-				<a class="app-footer" href="https://github.com/chjj/marked">marked</a></h1>
-		</footer>
-	</div>
-	<script type="text/template" id="note-template">
-		<h1 class="note"><span><%- name %></span></h1>
-		<section class="note-body inactive-note">
-			<div class="note-view-buttons">
-				<span class="button-input">
-					<input type="button" class="button edit-note-button edit" value="edit" />
-				</span>
+		</div>
+	</header>
+	<section class="notes" id="notes">
+		<!-- notes will be inserted here -->	
+	</section>
+	<footer class="app">
+		 <h1 class="app-footer">
+			 <a class="app-footer" 
+				 href="http://expressjs.com/">express</a> | 
+			 <a class="app-footer" 
+				 href="http://backbonejs.org/">backbone</a> | 
+			 <a class="app-footer" 
+				 href="https://github.com/chjj/marked">marked</a></h1>
+	</footer>
+</div>
+
+
+<script type="text/x-handlebars-template" id="note-template">
+	<h1 class="note"><span>{{name}}</span></h1>
+	<section class="note-body inactive-note">
+		<div class="note-view-buttons">
+			<span class="button-input">
+			<input type="button" 
+				class="button edit-note-button edit" value="edit" />
+			</span>
+		</div>
+	</section>
+</script>
+
+
+<script type="text/x-handlebars-template" id="edit-note-template">
+	<header class="app">
+		<div class="buttons">
+			<span class="button-input">
+				<input type="button" 
+				class="button delete" value="{{archiveButtonValue}}" />
+			</span>
+			<span class="button-input">
+				<input type="button" class="button close" value="save &amp; close" />
+			</span>
+			<div class="select-input">
+				<select class="dropdown js-add-to-stack-select">
+					<option value="null">stack membership</option>
+				</select>
 			</div>
-		</section>
-	</script>
-	<script type="text/template" id="edit-note-template">
-		<header class="app">
-			<div class="buttons">
-				<span class="button-input">
-					<% if (isArchived) { %>
-						<input type="button" class="button b3 delete" value="unarchive" />
-					<% } else { %>
-						<input type="button" class="button b3 delete" value="archive" />
-					<% } %>
-				</span>
-				<span class="button-input">
-					<input type="button" class="button b1 close" value="save &amp; close" />
-				</span>
-				<div class="select-input">
-					<select class="dropdown js-add-to-stack-select">
-						<option value="null">stack membership</option>
-					</select>
-				</div>
-			</div>
-		</header>
-		<form class="form">
+		</div>
+	</header>
+	<form class="form">
+		<div class="text-input">
+			<span class="text-input-label">name:</span>
+			<input type="text" class="text edit-name" value="{{name}}" />
+		</div>
+			<span class="text-input-label">markdown:</span>
+		<div class="textarea">
+			<textarea class="textarea edit-markdown">{{markdown}}</textarea>
+		</div>
+	</form>
+</script>
+
+
+<script type="text/x-handlebars-template" id="edit-user-template">
+	<header class="app">
+		<div class="button-input">
+			<input type="button" class="button close" value="save &amp; close" />
+		</div>
+	</header>
+	<hr class="rule" />
+	<form class="form">
+		<h2 class="form">Account Details</h2>
+		<div class="text-input">
+			<span class="text-input-label">username:</span>
+			<input type="text" 
+			class="text edit-username" value="{{username}}" readonly />
+		</div>
+		<div class="text-input">
+			<span class="text-input-label">email:</span>
+			<input type="text"
+			class="text edit-email" value="{{email}}" readonly />
+		</div>
+	</form>
+</script>
+
+
+<script type="text/x-handlebars-template" id="edit-stack-template">
+	<header class="app">
+		<span class="button-input">
+			<input type="button" class="button delete" value="archive" />
+		</span>
+		<span class="button-input">
+			<input type="button" 
+			class="button close" value="save &amp; close" />
+		</span>
+	</header>
+	<form class="form">
+		<section class="form">
+			<h2 class="form">Edit Stack</h2>
 			<div class="text-input">
 				<span class="text-input-label">name:</span>
-				<input type="text" class="text edit-name" value="<%- name %>" />
+				<input type="text" 
+				class="text js-stack-name" value="{{stackName}}" />
 			</div>
-				<span class="text-input-label">markdown:</span>
-			<div class="textarea">
-				<textarea class="textarea edit-markdown"><%- markdown %></textarea>
+			<div class="text-input">
+				<span class="text-input-label">notes:</span>
+				<ol>
+					<li></li>
+					<li></li>
+					<li></li>
+				</ol>
 			</div>
-		</form>
-	</script>
-	<script type="text/template" id="edit-user-template">
-		<header class="app">
-			<div class="button-input">
-				<input type="button" class="button close" value="save &amp; close" />
-			</div>
-		</header>
-		<form class="form">
-			<section class="form">
-				<h2 class="form">Account Details</h2>
-				<div class="text-input">
-					<span class="text-input-label">username:</span>
-					<input type="text" class="text edit-username" value="<%- username %>" readonly />
-				</div>
-				<div class="text-input">
-					<span class="text-input-label">email:</span>
-					<input type="text" class="text edit-email" value="<%- email %>" readonly />
-				</div>
-			</section>
-			<section class="form" style="display:none;">
-				<h2 class="form">Color Scheme</h2>	
-				<div class="text-input appColor js-input-container">
-					<span class="text-input-label">app color:</span>
-					<input type="text" class="text js-color-input" value="<%- appColor %>" />
-					<span class="feedback"></span>
-				</div>
-				<div class="text-input noteColor js-input-container">
-					<span class="text-input-label">note color:</span>
-					<input type="text" class="text js-color-input" value="<%- noteColor %>" />
-					<span class="feedback"></span>
-				</div>
-				<div class="text-input buttonColor js-input-container">
-					<span class="text-input-label">button color:</span>
-					<input type="text" class="text js-color-input" value="<%- buttonColor %>" />
-					<span class="feedback"></span>
-				</div>
-				<div class="button-input">
-					<input type="button" class="button default-colors" value="reset to default colors" />
-				</div>
-			</section>
-		</form>
-	</script>
-	<script type="text/template" id="edit-stack-template">
-		<header class="app">
-			<span class="button-input">
-				<input type="button" class="button b3 delete" value="archive" />
-			</span>
-			<span class="button-input">
-				<input type="button" class="button b1 close" value="save &amp; close" />
-			</span>
-		</header>
-		<form class="form">
-			<section class="form">
-				<h2 class="form">Edit Stack</h2>
-				<div class="text-input">
-					<span class="text-input-label">name:</span>
-					<input type="text" class="text js-stack-name" value="<%- stackName %>" />
-				</div>
-				<div class="text-input">
-					<span class="text-input-label">notes:</span>
-					<ol>
-						<li></li>
-						<li></li>
-						<li></li>
-					</ol>
-				</div>
-			</section>
-		</form>
-	</script>
-	<script src="libraries/json2.js"></script>
-	<script src="libraries/jquery-2.0.3.js"></script>
-	<script src="libraries/underscore.js"></script>
-	<script src="libraries/backbone.js"></script>
-	<script src="libraries/marked.js"></script>
-	<script src="client-app.js"></script>
+		</section>
+	</form>
+</script>
+
+
+<script src="libraries/json2.js"></script>
+<script src="libraries/jquery-2.0.3.js"></script>
+<script src="libraries/underscore.js"></script>
+<script src="libraries/backbone.js"></script>
+<script src="libraries/marked.js"></script>
+<script src="libraries/handlebars-v1.3.0.js"></script>
+<script src="client-app.js"></script>
 </body>
 </html>

@@ -47,38 +47,6 @@ function main() {
  */
 var User = Backbone.Model.extend({
 	url: '/user',
-	validate: function(attrs, options) {
-		var errors = [];
-		if (!this.isValidColorCode(attrs.colorScheme.appColor)) {
-			errors.push({
-				'message':'Invalid app color code',
-				'class':'appColor'
-			});
-		}
-		if (!this.isValidColorCode(attrs.colorScheme.noteColor)) {
-			errors.push({
-				'message':'Invalid note color code',
-				'class':'noteColor'
-			});
-		}
-		if (!this.isValidColorCode(attrs.colorScheme.buttonColor)) {
-			errors.push({
-				'message':'Invalid button color code',
-				'class':'buttonColor'
-			});
-		}
-		if (errors.length > 0) {
-			return errors;
-		}
-	},
-	isValidColorCode: function(string) {
-		try {
-			return string.match(/^#([0-9abcdef]{6}|[0-9abcdef]{3})$/i);
-		} catch(ex) {
-			console.log(ex);
-			return false;
-		}
-	},
 	getUsername: function() {
 		return this.get('username');
 	},
@@ -309,7 +277,7 @@ var StackDropdownView = Backbone.View.extend({
 var StackEditView = Backbone.View.extend({
 	tagName: 'div',
 	className: 'edit-view',
-	template: _.template( $('#edit-stack-template').html() ),
+	template: Handlebars.compile( $('#edit-stack-template').html() ),
 	initialize: function(options) {
 		
 	},
@@ -344,10 +312,10 @@ var StackEditView = Backbone.View.extend({
 	},
 	render: function() {
 		$('#app').hide();
-		var stackName = this.model.getName();
-		this.$el.html(this.template({
-			'stackName':stackName
-		}));
+		var context = {
+			'stackName': this.model.getName()
+		};
+		this.$el.html(this.template(context));
 		return this; 
 	}
 });
@@ -359,7 +327,7 @@ var StackEditView = Backbone.View.extend({
 var UserEditView = Backbone.View.extend({
 	tagName: 'div',
 	className: 'edit-user-pane',
-	template: _.template( $('#edit-user-template').html() ),
+	template: Handlebars.compile( $('#edit-user-template').html() ),
 	initialize: function(options) {
 		this.listenTo(this.model, 'invalid', this.reportValidationErrors);
 		console.log('getStacks()');
@@ -421,16 +389,15 @@ var UserEditView = Backbone.View.extend({
 	},
 	render: function() {
 		$('#app').hide();
-		var username = this.model.getUsername();
-		var email = this.model.getEmail();
 		var colorScheme = this.model.getColorScheme();
-		this.$el.html(this.template({
-			'username':username, 
-			'email':email,
+		var context = {
+			'username':this.model.getUsername(), 
+			'email':this.model.getEmail(),
 			'appColor': colorScheme.appColor,
 			'noteColor': colorScheme.noteColor,
 			'buttonColor': colorScheme.buttonColor
-		}));
+		};
+		this.$el.html(this.template(context));
 		return this; 
 	}
 });
@@ -442,7 +409,7 @@ var UserEditView = Backbone.View.extend({
 var NoteView = Backbone.View.extend({
 	tagName: 'article',
 	className: 'note inactive-note',
-	template: _.template( $('#note-template').html() ),
+	template: Handlebars.compile( $('#note-template').html() ),
 	initialize: function(options) {
 		this.stacksCollection = options.stacksCollection;
 		this.listenTo(this.model, 'change', this.render);
@@ -487,9 +454,11 @@ var NoteView = Backbone.View.extend({
 		} else if (!isArchived && !this.showUnarchivedNotes) {
 			this.remove();
 		} else {
-			var name = this.model.getName();
 			var bodyHTML = jQuery.parseHTML(this.model.getBodyHTML());
-			this.$el.html(this.template({'name':name}));
+			var context = {
+				'name': this.model.getName()
+			};
+			this.$el.html(this.template(context));
 			$('.note-body', this.$el).first().append(bodyHTML);
 		}
 		return this; 
@@ -503,7 +472,7 @@ var NoteView = Backbone.View.extend({
 var NoteEditView = Backbone.View.extend({
 	tagName: 'div',
 	className: 'edit-note-pane',
-	template: _.template( $('#edit-note-template').html() ),
+	template: Handlebars.compile( $('#edit-note-template').html() ),
 	initialize: function(options) {
 		this.stacksCollection = options.stacksCollection;
 		this.stackDropdownViews = [];
@@ -578,12 +547,20 @@ var NoteEditView = Backbone.View.extend({
 		});
 	},
 	render: function() {
-		console.log('render');
 		$('#app').hide();
-		var name = this.model.getName();
-		var markdown = this.model.getMarkdown();
-		var isArchived = this.model.getDeleted();
-		this.$el.html(this.template({'name':name, 'markdown':markdown, 'isArchived':isArchived}));
+		var context = {
+			'name': this.model.getName(), 
+			'markdown': this.model.getMarkdown(),
+			'isArchived': this.model.getDeleted()
+		};
+		Handlebars.registerHelper('archiveButtonValue', function() {
+			if (this.isArchived) {
+				return 'unarchive';
+			} else {
+				return 'archive';
+			}
+		});
+		this.$el.html(this.template(context));
 		for(var i = 0; i < this.stackDropdownViews.length; i++ ) {
 			var view = this.stackDropdownViews[i];
 			var stackModel = view.model;

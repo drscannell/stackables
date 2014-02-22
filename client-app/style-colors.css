@@ -41,10 +41,7 @@ input.button {
 	color:rgba(160,180,200,1);
 }
 hr.rule {
-	border-color:rgba(160,180,200,1);
-	border:0;
-	border-top:1px solid;
-	margin:10px 0 10px 0;
+	border-color:rgb(160,180,200);
 }
 select.dropdown {
 	color: rgba(160,180,200,1);
