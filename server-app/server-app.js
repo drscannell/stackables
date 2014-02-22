@@ -252,15 +252,6 @@ app.post('/user', function(req, res){
 app.get('/', function(req, res) {
 	res.sendfile('client-app/index.html');
 });
-app.get('/color-scheme.css', function(req, res) {
-	stackables.getCustomizedCss(stackables.getUserIdFromCookie(req), function(err, data) {
-		if (!err) {
-			res.status(200).set('Content-Type', 'text/css').send(data);
-		} else {
-			res.status(500).send({'error':'Failed to get custom CSS'});
-		}
-	});
-});
 app.use(express.directory('client-app'));
 app.use(express.static('client-app'));
 
@@ -272,25 +263,19 @@ app.use(express.static('client-app'));
 
 var stackables = {};
 
-/**
- * @function isLoggedInAsAdmin
- */
+// @function isLoggedInAsAdmin
 stackables.isLoggedInAsAdmin = function(req) { 
 	if (!req) throw Error('stackables.getUserIdFromCookie(req) requires non-null argument');
 	return (req.signedCookies[COOKIE_NAME] == 'admin'); 
-}
+};
 
-/**
- * @function isLoggedInAsUser
- */
+// @function isLoggedInAsUser
 stackables.isLoggedInAsUser = function(req) { 
 	if (!req) throw Error('stackables.getUserIdFromCookie(req) requires non-null argument');
 	return (req.signedCookies[COOKIE_NAME]); 
-}
+};
 
-/**
- * @function getUserIdFromCookie
- */
+// @function getUserIdFromCookie
 stackables.getUserIdFromCookie = function(req) { 
 	if (!req) throw Error('stackables.getUserIdFromCookie(req) requires non-null argument');
 	try {
@@ -298,13 +283,10 @@ stackables.getUserIdFromCookie = function(req) {
 	} catch(ex) {
 		return null;
 	}
-}
+};
 
-/**
- * Get user id from cookie and wrap in ObjectId object.
- *
- * @function getUserObjectIdFromCookie
- */
+// Get user id from cookie and wrap in ObjectId object.
+// @function getUserObjectIdFromCookie
 stackables.getUserObjectIdFromCookie = function(req) {
 	try {
 		var id = stackables.getUserIdFromCookie(req);
@@ -312,11 +294,9 @@ stackables.getUserObjectIdFromCookie = function(req) {
 	} catch(ex) {
 		return null;
 	}
-}
+};
 
-/**
- * @function updateUser
- */
+// @function updateUser
 stackables.updateUser = function(newData, callback) {
 	var id = newData._id;
 	delete newData._id;
@@ -328,10 +308,9 @@ stackables.updateUser = function(newData, callback) {
 			callback({'error':'Unable to update user'}, null);
 		}
 	});
-}
-/*
- * Add a single stack
- */
+};
+
+// Add a single stack
 stackables.addStack = function(newData, callback) {
 	console.log('addStack');
 	console.log('  name: ' + newData.name);
@@ -345,11 +324,9 @@ stackables.addStack = function(newData, callback) {
 			callback({'error':'Failed to add new stack'}, null);
 		}
 	});
-}
+};
 
-/*
- * Update a single stack
- */
+// Update a single stack
 stackables.updateStack = function(newData, callback) {
 	var id = newData._id;
 	delete newData._id;
@@ -361,11 +338,9 @@ stackables.updateStack = function(newData, callback) {
 			callback({'error':'Unable to update stack'}, null);
 		}
 	});
-}
+};
 
-/**
- * @function getAllStacks
- */
+// @function getAllStacks
 stackables.getAllStacks = function(userId, callback) {
 	stackables.getUserById(userId, function(err, user) {
 		if (!err) {
@@ -387,9 +362,7 @@ stackables.getAllStacks = function(userId, callback) {
 	});
 };
 
-/**
- * @function getStacksByIdArray
- */
+// @function getStacksByIdArray
 stackables.getStacksByIdArray = function(idArray, callback) {
 	Stack.find({'_id': {$in:idArray}}, function(err, stacks) {
 		if (!err) {
@@ -401,9 +374,7 @@ stackables.getStacksByIdArray = function(idArray, callback) {
 	});
 };
 
-/**
- * @function getStackById
- */
+// @function getStackById
 stackables.getStackById = function(id, callback) {
 	Stack.findById(id, function(err, data) {
 		if (!err) {
@@ -414,10 +385,9 @@ stackables.getStackById = function(id, callback) {
 		}
 	});
 };
-/*
- * Add a single note
- */
-function addNote(req, res) {
+
+// Add a single note
+var addNote = function(req, res) {
 	req.body.createdby = stackables.getUserObjectIdFromCookie(req);
 	console.log('  name: ' + req.body.name);
 	console.log('  createdby: ' + req.body.createdby);
@@ -431,17 +401,13 @@ function addNote(req, res) {
 			res.status(501).send({'error':err});
 		}
 	});
-}
+};
 
-/*
- * Update a single note
- */
-function updateNote(req, res) {
+// Update a single note
+var updateNote = function(req, res) {
 	var noteId = req.body._id;
 	delete req.body._id;
-	/*
-	 * if empty, fill out createdby
-	 */
+	// if empty, fill out createdby
 	if( !('createdby' in req.body) ) {
 		req.body.createdby = stackables.getUserObjectIdFromCookie(req);
 	}
@@ -457,15 +423,11 @@ function updateNote(req, res) {
 			res.status(501).send({'error':err});
 		}
 	});
-}
+};
 
-/*
- * Fetch all non-deleted notes
- * 
- * This function will recurse up to five
- * times if the db connection is not open.
- */
-function getAllNotes(req, res, attempts) {
+// Fetch all non-deleted notes
+// Recurse up to 5 times if db connection is not open.
+var getAllNotes = function(req, res, attempts) {
 	var userObjectId = stackables.getUserObjectIdFromCookie(req);
 	var query = {'deleted':false, 'createdby':userObjectId};
 	console.log('  get all notes created by ' + query.createdby);
@@ -478,9 +440,10 @@ function getAllNotes(req, res, attempts) {
 			res.send({'error':'Failed to retrieve data from database.'});
 		}
 	});
-}
+};
 
-function getAllArchivedNotes(req, res, attempts) {
+// get all archived notes
+var getAllArchivedNotes = function(req, res, attempts) {
 	var userObjectId = stackables.getUserObjectIdFromCookie(req);
 	var query = {'deleted':true, 'createdby':userObjectId};
 	console.log('  get all notes created by ' + query.createdby);
@@ -493,8 +456,9 @@ function getAllArchivedNotes(req, res, attempts) {
 			res.send({'error':'Failed to retrieve data from database.'});
 		}
 	});
-}
+};
 
+// get notes by stack id
 stackables.getNotesByStackId = function(stackId, callback) {
 	console.log('  Fetch notes in stack ' + stackId);
 	stackables.getStackById(stackId, function(err, stack) {
@@ -520,6 +484,7 @@ stackables.getNotesByStackId = function(stackId, callback) {
 	});
 };
 
+// get notes by id array
 stackables.getNotesByIdArray = function(idArray, callback) {
 	Note.find({'_id': {$in:idArray}},undefined,{sort:{'_id':1}}, function(err, notes) {
 		if (!err) {
@@ -530,9 +495,8 @@ stackables.getNotesByIdArray = function(idArray, callback) {
 		}
 	});
 };
-/**
- * Get note from database
- */
+
+// Get note from database
 stackables.getNote = function(req, res, attempts) {
 	var id = req.query.id;
 	console.log('  get note where _id = ' + id);
@@ -547,9 +511,7 @@ stackables.getNote = function(req, res, attempts) {
 	});
 }
 
-/**
- * Get user from database by id
- */
+//Get user from database by id
 stackables.getUserById = function(id, callback) {
 	User.findById( id, {'username':true, 'email':true, 'colorScheme':true, 'stacks':true}, function(err, user) {
 		if(!err && user != null) {
@@ -560,9 +522,7 @@ stackables.getUserById = function(id, callback) {
 	});
 };
 
-/**
- * Get user from database with general query
- */
+//Get user from database with general query
 stackables.getUser = function(query, callback) {
 	console.log('getUser');
 	User.findOne( query, function(err, user) {
@@ -574,103 +534,4 @@ stackables.getUser = function(query, callback) {
 	});
 };
 
-/*
- * build CSS file customized for
- * user based on color scheme settings
- */
-stackables.getCustomizedCss = function(userId, callback) {
-	/*
-	 * get user data from which
-	 * to customize css
-	 */
-	console.log('  Checking db for user with id=' + userId);
-	User.findById(userId, {'colorScheme':true}, function(err, user) {
-		if (!err && user != null) {
-			console.log('  got user data to build css from');
-			/*
-			 * get the final css data
-			 */
-			stackables.getCustomColorCss(user.colorScheme, function(err, finalCss) {
-				if(!err) {
-					console.log('  Successfully created custom css');
-					callback(null, finalCss);
-				} else {
-					console.log('  Failed to get custom css: ' + err);
-					callback({'error':err}, null);
-				}
-			});
-		} else {
-			console.log('  stackables.getCustomizedCss.error: ' + err);
-			callback({'error':'Failed to get user data'}, null);
-		}
-	});
-};
-
-/*
- * - get color scheme template, modify
- *   with user values
- */
-stackables.getCustomColorCss = function(colorSchemeObject, callback) {
-	var colorScheme = stackables.getSafeColorScheme(colorSchemeObject);
-	fs.readFile('client-app/color-scheme.css', function(err, template) {
-		if (!err) {
-			/*
-			 * simple regex templating
-			 */
-			var colorSchemeCss = template.toString();
-			colorSchemeCss = colorSchemeCss
-				.replace(/\$appColor/g, colorScheme.appColor)
-				.replace(/\$noteColor/g, colorScheme.noteColor)
-				.replace(/\$buttonColor/g, colorScheme.buttonColor);
-			var finalCss = colorSchemeCss;
-			callback(null, finalCss);
-		} else {
-			console.log('  error reading css color scheme template');
-			callback({'error':'Failed to generate color scheme CSS'}, null);
-		}
-	});
-}
-
-/*
- * validate fields in color scheme
- * object before inserting into CSS
- */
-stackables.getSafeColorScheme = function(colorSchemeObject) {
-	/*
-	 * default values to use if any
-	 * are invalid
-	 */
-	var defaultColorScheme = {
-		'appColor':'#33cccc',
-		'noteColor':'#66cc66',
-		'buttonColor':'#336666'
-	};
-	if ( !colorSchemeObject) {
-		return defaultColorScheme;
-	}
-	if (!('appColor' in colorSchemeObject) || !stackables.isValidColorCode(colorSchemeObject.appColor)) {
-		colorSchemeObject.appColor = defaultColorScheme.appColor;
-	}
-	if (!('noteColor' in colorSchemeObject) || !stackables.isValidColorCode(colorSchemeObject.noteColor)) {
-		colorSchemeObject.noteColor = defaultColorScheme.noteColor;
-	}
-	if (!('buttonColor' in colorSchemeObject) || !stackables.isValidColorCode(colorSchemeObject.buttonColor)) {
-		colorSchemeObject.buttonColor = defaultColorScheme.buttonColor;
-	}
-	return colorSchemeObject;
-}
-
-/*
- * basic regex check allowing
- * for three or six digit hex
- * codes
- */
-stackables.isValidColorCode = function(string) {
-	try {
-		return string.match(/^#([0-9abcdef]{6}|[0-9abcdef]{3})$/i);
-	} catch(ex) {
-		console.log(ex);
-		return false;
-	}
-}
 
