@@ -1,0 +1,99 @@
+
+body {
+	text-align:center;
+}
+div.app {
+	width:800px;
+	display:inline-block;
+	text-align:left;
+	margin-top:5px;
+	margin-bottom:5px;
+	border-radius:5px;
+	overflow:hidden;
+}
+section#notes {
+	text-align:left;
+}
+header.app {
+	padding-right:10px;
+	margin-bottom:10px;
+}
+footer.app {
+	border-top: 1px solid;
+}
+h1.app-header {
+	text-align:left;
+	padding-left:10px;
+	padding-bottom:0;
+	vertical-align:sub;
+	font-size:1.5em;
+	border-bottom:1px solid;
+}
+/*
+ * note view
+ */
+article.note {
+	margin:10px 0 10px 0;
+	display:inline-block;
+	vertical-align:middle;
+	text-align:left;
+	width:100%;
+	border:1px solid #888;
+	border-radius:5px;
+	box-sizing:border-box;
+}
+article.inactive-note {
+	margin:0;
+	width:33.333%;
+	border:0;
+}
+h1.note {
+	height:3em;
+	font-size:1em;
+	border-radius:5px;
+	line-height:3em;
+	text-align:center;
+}
+h1.note > span {
+	display:inline-block;
+	line-height:1.2em;
+	vertical-align:middle;
+}
+section.note-body {
+	margin:0;
+	padding:5px 15px 5px 15px;
+}
+article.inactive-note > section.note-body {
+	display:none;
+	padding:0;
+	height:0;
+	margin:0;
+}
+/* 
+ * buttons 
+ */
+div.buttons {
+	text-align:right;
+	padding:5px;
+}
+.button-input {
+	display:inline-block;
+	vertical-align:top;
+	margin:0;
+	outline:0;
+	padding:0;
+}
+input.button {
+	display:inline-block;
+	margin:0;
+	outline:0;
+	min-height:50px;
+	width:auto;
+	padding: 0 10px 0 10px;
+	min-width:100px;
+}
+input.b1 {min-height:80px;min-width:200px;font-size:1em;}
+input.b2 {min-height:60px;min-width:100px;font-size:0.8em;}
+input.b3 {min-height:40px;min-width:75px;font-size:0.6em;}
+input.b4 {min-height:20px;min-width:50px;font-size:0.4em;}
+
