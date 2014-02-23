@@ -102,7 +102,7 @@ module.exports = function(models){
 	stackables.addStack = function(newData, callback) {
 		console.log('addStack');
 		console.log('name: ' + newData.name);
-		var newStack = new Stack(newData);
+		var newStack = new models.Stack(newData);
 		newStack.save(function(err, stack) {
 			if (!err) {
 				console.log('successfully added stack');
@@ -179,7 +179,7 @@ module.exports = function(models){
 		req.body.createdby = stackables.getUserObjectIdFromCookie(req);
 		console.log('name: ' + req.body.name);
 		console.log('createdby: ' + req.body.createdby);
-		var newNote = new Note(req.body);
+		var newNote = new models.Note(req.body);
 		newNote.save(function(err, note) {
 			if (!err) {
 				console.log('successfully added note');
