@@ -32,10 +32,11 @@ var AppView = Backbone.View.extend({
 	},
 	addNewNote: function() {
 		var note = new Note();
-		this.notesCollection.add(note);
 		var view = new NoteEditView({
+			'isNew':true,
 			'model':note,
-			'stacksCollection':this.stacksCollection
+			'stacksCollection':this.stacksCollection,
+			'notesCollection':this.notesCollection
 		});
 		$('body').append(view.render().$el);
 	},

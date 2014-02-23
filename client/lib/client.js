@@ -258,6 +258,7 @@ var NoteView = Backbone.View.extend({
 		console.log('this.stacksCollection: ' + this.stacksCollection);
 		var editView = new NoteEditView({
 			'normalView':this, 
+			'isNew':false,
 			'model':this.model,
 			'stacksCollection':this.stacksCollection
 		});
@@ -290,7 +291,9 @@ var NoteEditView = Backbone.View.extend({
 	className: 'edit-note-pane',
 	template: Handlebars.compile( $('#edit-note-template').html() ),
 	initialize: function(options) {
+		this.isNew = options.isNew;
 		this.stacksCollection = options.stacksCollection;
+		this.notesCollection = options.notesCollection;
 		this.stackDropdownViews = [];
 		var that = this;
 		// create subview for each stack in list
@@ -303,15 +306,21 @@ var NoteEditView = Backbone.View.extend({
 	events: {
 		'click input.delete': 'deleteNote',
 		'click input.close': 'saveAndCloseNote',
+		'click input.js-cancel': 'cancel',
 		'change select.js-add-to-stack-select': 'toggleCollectionMembership'
+	},
+	cancel: function(event) {
+		event.stopPropagation();
+		$('#app').show();
+		this.remove();
 	},
 	deleteNote: function(event) {
 		event.stopPropagation();
-		var view = this;
+		var _this = this;
 		this.model.setDeleted();
 		this.saveNote(function(err, success) {
 			$('#app').show();
-			view.remove();
+			_this.remove();
 		});
 	},
 	toggleCollectionMembership: function(event) {
@@ -341,6 +350,7 @@ var NoteEditView = Backbone.View.extend({
 		var markdown = $('.edit-markdown', this.$el).first().val();
 		this.model.setName(name);
 		this.model.setMarkdown(markdown);
+		var _this = this;
 		this.model.save(undefined,{
 			error:function(model, xhr, options) {
 				console.log('Failed to save note');
@@ -350,6 +360,10 @@ var NoteEditView = Backbone.View.extend({
 			success:function(model, response, options){
 				console.log('Successfully saved note');
 				callback(null, true);
+				if (_this.isNew) {
+					console.log('Adding to notes collection');
+					_this.notesCollection.add(model);
+				}
 			}
 		});
 	},
@@ -388,6 +402,7 @@ var NoteEditView = Backbone.View.extend({
 		return this; 
 	}
 });
+
 
 
 /*
@@ -588,10 +603,11 @@ var AppView = Backbone.View.extend({
 	},
 	addNewNote: function() {
 		var note = new Note();
-		this.notesCollection.add(note);
 		var view = new NoteEditView({
+			'isNew':true,
 			'model':note,
-			'stacksCollection':this.stacksCollection
+			'stacksCollection':this.stacksCollection,
+			'notesCollection':this.notesCollection
 		});
 		$('body').append(view.render().$el);
 	},
