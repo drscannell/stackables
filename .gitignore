@@ -9,4 +9,4 @@
 # node
 node_modules
 
-lib/*.js
+client/lib/*.js
