@@ -94,7 +94,7 @@ var User = Backbone.Model.extend({
 var Note = Backbone.Model.extend({
 	defaults: {
 		'name':'Untitled Note',
-		'markdown':'[enter note text here]',
+		'markdown':'',
 		'deleted':false
 	},
 	url: function(){
