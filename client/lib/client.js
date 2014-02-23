@@ -1,101 +1,170 @@
 
-
 /*
- * @class StackDropdownView
- * @extends Backbone.View
+ * @class User
+ * @extends Backbone.Model
  */
-var StackDropdownView = Backbone.View.extend({
-	tagName: 'option',
-	className: 'stack',
-	initialize: function(options) {
-		this.listenTo(this.model, 'change', this.render);
+var User = Backbone.Model.extend({
+	url: '/user',
+	getUsername: function() {
+		return this.get('username');
 	},
-	toggleNoteMembership: function(noteModel) {
-		console.log('StackDropdownView.toggleNoteMembership');
-		this.model.toggleNoteMembership(noteModel);
-		this.model.save(undefined, {
-			'thisView':this,
-			error:function(){
-				console.log('failed to update stack');
-			},
-			success:function(model, response, options){
-				console.log('successfully updated stack');
-				options.thisView.render();
-			}
-		});
+	setUsername: function(username) {
+		this.set('username', username);
 	},
-	setChecked: function(shouldCheck) {
-		this.options.isChecked = shouldCheck;
+	getEmail: function() {
+		return this.get('email');
 	},
-	isSelected: function() {
-		console.log('StackDropdownView.isSelected()');
-		console.log(this.$el.get(0));
-		return this.$el.attr('selected');
+	setEmail: function(email) {
+		this.set('email',email);
 	},
-	render: function() {
-		if ( this.model.getDeleted() ) {
-			this.remove();
-		} else {
-			var name = this.model.getName();
-			var display = name;
-			if ('isChecked' in this.options && this.options.isChecked) {
-				display = '+ ' + display;
-			} else if ('isChecked' in this.options) {
-				display = '- ' + display;
-			}
-			this.$el.attr('value', this.model.getId());
-			this.$el.html(display);
-		}
-		return this; 
+	getStacks: function() {
+		return this.get('stacks');
+	},
+	addStack: function(stackModel) {
+		var obj = {
+			'stackId':stackModel.getId(),
+			'name':stackModel.getName()
+		};
+		this.get('stacks').push(obj);
+		
 	}
 });
-/**
- * @class StackEditView
- * @extends Backbone.View
+
+/*
+ * @class Note
+ * @extends Backbone.Model
  */
-var StackEditView = Backbone.View.extend({
-	tagName: 'div',
-	className: 'edit-view',
-	template: Handlebars.compile( $('#edit-stack-template').html() ),
-	initialize: function(options) {
-		
+var Note = Backbone.Model.extend({
+	defaults: {
+		'name':'Untitled Note',
+		'markdown':'',
+		'deleted':false
 	},
-	events: {
-		'click input.close': 'saveAndClose',
-		'click input.delete': 'archive'
+	url: function(){
+		return '/note?id=' + this.get('_id');
 	},
-	saveAndClose: function(event) {
-		console.log('save and close');
-		event.stopPropagation();
-		var name = $('.js-stack-name', this.$el).first().val();
-		var notes = [];
-		this.model.setName(name);
-		this.model.setNotes(notes);
-		this.model.save(undefined, {
-			userModel: this.options.userModel,
-			error:function(){
-				console.log('error');
-			},
-			success:function(model, response, options){
-				console.log('successfully added stack, now adding to user model');
-				console.log(model);
-				options.userModel.addStack(model);
-				options.userModel.save();
-			}
-		});
-		$('#app').show();
-		this.remove();
+	getId: function() {
+		return this.get('_id');
 	},
-	archive: function(event) {
-		console.log('archive stack');
+	getName: function() {
+		return this.get('name');
 	},
-	render: function() {
-		$('#app').hide();
-		var context = {
-			'stackName': this.model.getName()
-		};
-		this.$el.html(this.template(context));
-		return this; 
+	setName: function(newName) {
+		this.set('name', newName);
+	},
+	getBodyHTML: function() {
+		try {
+			var htmlText =  marked(this.getMarkdown());
+			return htmlText;
+		} catch (ex) {
+			return 'Markdown parser error: ' + ex
+		}
+	},
+	getMarkdown: function(markdown) {
+		return this.get('markdown');
+	},
+	setMarkdown: function(markdown) {
+		this.set('markdown', markdown);
+	},
+	getDeleted: function() {
+		return this.get('deleted');
+	},
+	setDeleted: function() {
+		if (this.getDeleted()) {
+			this.set('deleted', false);
+		} else {
+			this.set('deleted', true);
+		}
+	}
+});
+
+/**
+ * @class Stack
+ * @extends Backbone.Model
+ */
+var Stack = Backbone.Model.extend({
+	defaults: {
+		'name':'Untitled Stack',
+		'notes':[],
+		'deleted':false
+	},
+	//url: '/stack',
+	url: function(){
+		return '/stack?id=' + this.get('_id');
+	},
+	getId: function() {
+		return this.get('_id');
+	},
+	getName: function() {
+		return this.get('name');
+	},
+	setName: function(name) {
+		this.set('name', name);
+	},
+	getDeleted: function() {
+		return this.get('deleted');
+	},
+	setDeleted: function(trueFalse) {
+		this.set('deleted', trueFalse);
+	},
+	getNotes: function() {
+		return this.get('notes');
+	},
+	setNotes: function(notes) {
+		this.set('notes', notes);
+	},
+	toggleNoteMembership: function(noteModel) {
+		console.log('Stack.toggleNoteMembership');
+		var noteId = noteModel.getId();
+		var notes = this.get('notes')
+		var index = notes.indexOf(noteId);
+		if (index == -1) {
+			notes.push(noteId);
+		} else {
+			notes.splice(index, 1);
+		}
+	},
+	hasNote: function(noteId) {
+		var notes = this.get('notes')
+		if (notes.indexOf(noteId) == -1) {
+			return false;
+		}
+		return true;
+	}
+});
+
+
+/*
+ * @class StackList
+ * @extends Backbone.Collection
+ */
+var StackList = Backbone.Collection.extend({
+	model: Stack,
+	url: '/stacks',
+	initialize: function(models, options) {
+		this.fetch();
+	}
+});
+
+/*
+ * @class NoteList
+ * @extends Backbone.Collection
+ */
+var NoteList = Backbone.Collection.extend({
+	model: Note,
+	url: function() {
+		if (this.stackId) {
+			return '/notes?stackId=' + this.stackId;
+		} else {
+			return '/notes';
+		}
+	},
+	initialize: function(models, options) {
+		this.stackId = null;
+		if (options && 'stackId' in options) {
+			this.stackId = options.stackId;
+		}
+		this.fetch();
 	}
 });
 
@@ -149,7 +218,6 @@ var UserEditView = Backbone.View.extend({
 		return this; 
 	}
 });
-
 /*
  * @class NoteView
  * @extends Backbone.View
@@ -321,6 +389,111 @@ var NoteEditView = Backbone.View.extend({
 	}
 });
 
+
+/*
+ * @class StackDropdownView
+ * @extends Backbone.View
+ */
+var StackDropdownView = Backbone.View.extend({
+	tagName: 'option',
+	className: 'stack',
+	initialize: function(options) {
+		this.listenTo(this.model, 'change', this.render);
+	},
+	toggleNoteMembership: function(noteModel) {
+		console.log('StackDropdownView.toggleNoteMembership');
+		this.model.toggleNoteMembership(noteModel);
+		this.model.save(undefined, {
+			'thisView':this,
+			error:function(){
+				console.log('failed to update stack');
+			},
+			success:function(model, response, options){
+				console.log('successfully updated stack');
+				options.thisView.render();
+			}
+		});
+	},
+	setChecked: function(shouldCheck) {
+		this.options.isChecked = shouldCheck;
+	},
+	isSelected: function() {
+		console.log('StackDropdownView.isSelected()');
+		console.log(this.$el.get(0));
+		return this.$el.attr('selected');
+	},
+	render: function() {
+		if ( this.model.getDeleted() ) {
+			this.remove();
+		} else {
+			var name = this.model.getName();
+			var display = name;
+			if ('isChecked' in this.options && this.options.isChecked) {
+				display = '+ ' + display;
+			} else if ('isChecked' in this.options) {
+				display = '- ' + display;
+			}
+			this.$el.attr('value', this.model.getId());
+			this.$el.html(display);
+		}
+		return this; 
+	}
+});
+
+/**
+ * @class StackEditView
+ * @extends Backbone.View
+ */
+var StackEditView = Backbone.View.extend({
+	tagName: 'div',
+	className: 'edit-view',
+	template: Handlebars.compile( $('#edit-stack-template').html() ),
+	initialize: function(options) {
+			this.userModel = options.userModel;
+			this.stacksCollection = options.stacksCollection;
+	},
+	events: {
+		'click input.close': 'saveAndClose',
+		'click input.delete': 'archive'
+	},
+	saveAndClose: function(event) {
+		console.log('save and close');
+		event.stopPropagation();
+		var name = $('.js-stack-name', this.$el).first().val();
+		var notes = [];
+		this.model.setName(name);
+		this.model.setNotes(notes);
+		var _this = this;
+		this.model.save(undefined, {
+			userModel: this.options.userModel,
+			error:function(){
+				console.log('error');
+			},
+			success:function(model, response, options){
+				console.log('successfully added stack');
+				console.log('adding stack to user model');
+				options.userModel.addStack(model);
+				options.userModel.save();
+				console.log('adding stack to stacks collection');
+				_this.stacksCollection.add(model);
+			}
+		});
+		$('#app').show();
+		this.remove();
+	},
+	archive: function(event) {
+		console.log('archive stack');
+	},
+	render: function() {
+		$('#app').hide();
+		var context = {
+			'stackName': this.model.getName()
+		};
+		this.$el.html(this.template(context));
+		return this; 
+	}
+});
+
 /*
  * @class AppView
  * @extends Backbone.View
@@ -365,7 +538,11 @@ var AppView = Backbone.View.extend({
 	addNewStack: function() {
 		console.log('add new stack');
 		var stack = new Stack();
-		var view = new StackEditView({'model':stack, 'userModel':this.userModel});
+		var view = new StackEditView({
+			'model':stack, 
+			'userModel':this.userModel,
+			'stacksCollection':this.stacksCollection
+		});
 		$('body').append(view.render().$el);
 	},
 	addNoteView: function(note) {
@@ -378,6 +555,7 @@ var AppView = Backbone.View.extend({
 		$('#notes').prepend(view.render().$el);
 	},
 	addStackDropdownView: function(stack) {
+		console.log('add stack dropdown view');
 		var view = new StackDropdownView({'model':stack});
 		$('.js-stack-select').append(view.render().$el);
 		this.stackViews.push(view);
@@ -396,3 +574,42 @@ var AppView = Backbone.View.extend({
 		
 	} 
 });
+
+function main() {
+	
+	/*
+	 * This app is mobile-first.
+	 * If not touch screen, trigger
+	 * desktop enhancements by adding
+	 * class to the body
+	 */
+	if ( !('ontouchstart' in window) ) {
+		$('body').addClass('not-mobile');
+	}
+
+	/*
+	 * configure markdown parser
+	 */
+	marked.setOptions({
+		gfm: true,
+		tables: true,
+		breaks: false,
+		pedantic: false,
+		sanitize: true,
+		smartLists: true,
+		smartypants: false,
+		langPrefix: 'lang-'
+	});
+
+	/*
+	 * instantiate
+	 */
+	var notes = new NoteList();
+	var stacks = new StackList();
+	var app = new AppView({
+		'notesCollection':notes,
+		'stacksCollection':stacks
+	});
+}
+
+$(document).ready(main);
