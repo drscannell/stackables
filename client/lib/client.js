@@ -59,21 +59,6 @@ var User = Backbone.Model.extend({
 	setEmail: function(email) {
 		this.set('email',email);
 	},
-	getDefaultColorScheme: function() {
-		var defaultColorScheme = {
-			'appColor':'#33cccc',
-			'noteColor':'#66cc66',
-			'buttonColor':'#336666'
-		};
-		return defaultColorScheme;
-	},
-	getColorScheme: function() {
-		var colorScheme =  this.get('colorScheme') || this.getDefaultColorScheme();
-		return $.extend(true,{},colorScheme);
-	},
-	setColorScheme: function(colorScheme) {
-		this.set('colorScheme', colorScheme);
-	},
 	getStacks: function() {
 		return this.get('stacks');
 	},
@@ -334,9 +319,7 @@ var UserEditView = Backbone.View.extend({
 		console.log(this.model.getStacks());
 	},
 	events: {
-		'click input.close': 'saveAndClose',
-		'click input.default-colors': 'applyDefaultColorScheme',
-		'input input.js-color-input': 'handleColorChange'
+		'click input.close': 'saveAndClose'
 	},
 	saveAndClose: function(event) {
 		event.stopPropagation();
@@ -349,36 +332,11 @@ var UserEditView = Backbone.View.extend({
 	updateModel: function() {
 		var email = $('.edit-email', this.$el).first().val();
 		this.model.setEmail(email);
-		var appColor = $('.appColor > input', this.$el).first().val();
-		var noteColor = $('.noteColor > input', this.$el).first().val();
-		var buttonColor = $('.buttonColor > input', this.$el).first().val();
-		this.model.setColorScheme({
-			'appColor': appColor,
-			'noteColor': noteColor,
-			'buttonColor': buttonColor
-		});
-
-	},
-	handleColorChange: function() {
-		this.updateModel();
-		if (this.model.save()) {
-			/*
-			 * update color css
-			 */
-			$('head').append('<link type="text/css" rel="stylesheet" href="color-scheme.css" />');
-			this.markAllInputsValid();
-		}
 	},
 	markAllInputsValid: function() {
-		$('.js-input-container', this.$el).removeClass('error').addClass('success');
-	},
-	applyDefaultColorScheme: function() {
-		var defaults = this.model.getDefaultColorScheme();
-		$('.appColor > input', this.$el).first().val(defaults.appColor);
-		$('.noteColor > input', this.$el).first().val(defaults.noteColor);
-		$('.buttonColor > input', this.$el).first().val(defaults.buttonColor);
-		$('.text-input', this.$el).removeClass('error').addClass('success');
-		this.handleColorChange();
+		$('.js-input-container', this.$el)
+			.removeClass('error')
+			.addClass('success');
 	},
 	reportValidationErrors: function(model, errors) {
 		$('.text-input', this.$el).removeClass('error').addClass('success');
@@ -389,13 +347,9 @@ var UserEditView = Backbone.View.extend({
 	},
 	render: function() {
 		$('#app').hide();
-		var colorScheme = this.model.getColorScheme();
 		var context = {
 			'username':this.model.getUsername(), 
-			'email':this.model.getEmail(),
-			'appColor': colorScheme.appColor,
-			'noteColor': colorScheme.noteColor,
-			'buttonColor': colorScheme.buttonColor
+			'email':this.model.getEmail()
 		};
 		this.$el.html(this.template(context));
 		return this; 

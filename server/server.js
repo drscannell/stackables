@@ -1,7 +1,6 @@
 
 var fs = require('fs');
 var app = require('express')();
-var models, stackables;
 var mongoose = require('mongoose');
 
 // mongo connect
@@ -21,9 +20,9 @@ db.once('open', function(){
 
 	console.log('Successfully connected to mongo');
 
-	models = require('./models.js')();
+	var models = require('./models.js')();
 
-	stackables = require('./stackables.js')(models);
+	var stackables = require('./stackables.js')(models);
 
 	require('./routes.js')(app, stackables);
 
