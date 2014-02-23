@@ -19,7 +19,7 @@ module.exports = function(app, stackables) {
 			next();
 		} else {
 			console.log('  not logged in. Sending login page.');
-			res.sendfile('client-app/login.html');
+			res.sendfile('client/login.html');
 		}
 	});
 
@@ -137,8 +137,8 @@ module.exports = function(app, stackables) {
 	});
 
 	app.get('/', function(req, res) {
-		res.sendfile('client-app/index.html');
+		res.sendfile('client/index.html');
 	});
-	app.use(express.directory('client-app'));
-	app.use(express.static('client-app'));
+	app.use(express.directory('client'));
+	app.use(express.static('client'));
 };
