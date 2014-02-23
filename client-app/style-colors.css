@@ -1,0 +1,54 @@
+
+/*
+$appColor
+$noteColor
+$buttonColor
+*/
+
+
+/* color scheme */
+body {
+	background:#ffffff;
+}
+header.app,footer.app {
+	background:transparent;
+	color:rgba(160,180,200,1);
+}
+h1.note {
+	color:#000;
+}
+article.note:nth-child(odd) h1.note {
+	background:rgba(200,220,240,0.4);
+}
+article.note:nth-child(even) h1.note {
+	background:rgba(200,220,240,0.2);
+}
+body.not-mobile h1.note:hover {
+	background:rgba(100,160,180,1);
+	color:#FFFFFF;
+}
+article.inactive-note h1.note {
+	color:#000;
+}
+
+body.not-mobile article.inactive-note h1.note:hover {
+	background:rgba(100,160,180,1);
+	color:#FFFFFF;
+}
+input.button {
+	border:1px solid;
+	background:white;
+	color:rgba(160,180,200,1);
+}
+hr.rule {
+	border-color:rgb(160,180,200);
+}
+select.dropdown {
+	color: rgba(160,180,200,1);
+}
+body.not-mobile input.button:hover {
+	background:rgba(100,160,180,1);
+	color:#FFFFFF;
+}
+
+
