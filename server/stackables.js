@@ -1,4 +1,8 @@
 var mongoose = require('mongoose');
+var fs = require('fs');
+var FILE_ENCODING = 'utf-8';
+var EOL = '\n';
+var config = require('./config.js');
 
 module.exports = function(models){
 
@@ -6,6 +10,27 @@ module.exports = function(models){
 	var COOKIE_NAME = 'clutter.loggedin';
 
 	stackables = {};
+
+	// from http://goo.gl/AGaXUe
+	stackables.concat = function(opts) {
+		var fileList = opts.src;
+		var distPath = opts.dest;
+		var out = fileList.map(function(filePath) {
+			return fs.readFileSync(filePath, FILE_ENCODING);
+		});
+		fs.writeFileSync(distPath, out.join(EOL), FILE_ENCODING);
+		console.log(distPath + ' built');
+	};
+
+	// concatenate pieces into main client js file
+	stackables.getClientApp = function(callback) {
+		path = 'client/lib/client.js';
+		stackables.concat({
+			src: config.jsList,
+			dest: path
+		});
+		callback(null, path);
+	};
 
 	// login
 	stackables.login = function(req, res, callback) {

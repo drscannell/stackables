@@ -8,3 +8,5 @@
 
 # node
 node_modules
+
+lib/*.js
