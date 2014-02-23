@@ -42,7 +42,7 @@ var AppView = Backbone.View.extend({
 	addNewStack: function() {
 		console.log('add new stack');
 		var stack = new Stack();
-		var view = new StackEditView({
+		var view = new StackCreateView({
 			'model':stack, 
 			'userModel':this.userModel,
 			'stacksCollection':this.stacksCollection

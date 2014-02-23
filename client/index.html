@@ -113,6 +113,28 @@
 </script>
 
 
+<script type="text/x-handlebars-template" id="create-stack-template">
+	<header class="app">
+		<span class="button-input">
+			<input type="button" class="button js-cancel" value="cancel" />
+		</span>
+		<span class="button-input">
+			<input type="button" 
+			class="button close" value="save &amp; close" />
+		</span>
+	</header>
+	<form class="form">
+		<section class="form">
+			<h2 class="form">New Stack</h2>
+			<div class="text-input">
+				<span class="text-input-label">name:</span>
+				<input type="text" 
+				class="text js-stack-name" value="{{stackName}}" />
+			</div>
+		</section>
+	</form>
+</script>
+
 <script type="text/x-handlebars-template" id="edit-stack-template">
 	<header class="app">
 		<span class="button-input">
