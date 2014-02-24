@@ -134,19 +134,6 @@ module.exports = function(app, stackables) {
 		res.sendfile('client/index.html');
 	});
 
-	/*
-	app.get('/lib/client.js', function(req, res) {
-		stackables.getClientApp(function(err, path) {
-			if (!err) {
-				res.set('Content-Type', 'text/javascript');
-				res.sendfile(path);
-			} else {
-				res.status(500).send(err);
-			}
-		});
-	});
-	*/
-
 	app.use(express.directory('client'));
 	app.use(express.static('client'));
 };
