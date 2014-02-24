@@ -19,7 +19,7 @@ module.exports = function(app, stackables) {
 			next();
 		} else {
 			console.log('  not logged in. Sending login page.');
-			res.sendfile('client-app/login.html');
+			res.sendfile('client/login.html');
 		}
 	});
 
@@ -86,6 +86,8 @@ module.exports = function(app, stackables) {
 	});
 
 	app.post('/stack', function(req, res){
+		console.log('post /stack');
+		console.log(req.body);
 		if ( '_id' in req.body ) {
 			stackables.updateStack(req.body, function(err, stack) {
 				if (!err) {
@@ -137,8 +139,20 @@ module.exports = function(app, stackables) {
 	});
 
 	app.get('/', function(req, res) {
-		res.sendfile('client-app/index.html');
+		res.sendfile('client/index.html');
 	});
-	app.use(express.directory('client-app'));
-	app.use(express.static('client-app'));
+
+	app.get('/lib/client.js', function(req, res) {
+		stackables.getClientApp(function(err, path) {
+			if (!err) {
+				res.set('Content-Type', 'text/javascript');
+				res.sendfile(path);
+			} else {
+				res.status(500).send(err);
+			}
+		});
+	});
+
+	app.use(express.directory('client'));
+	app.use(express.static('client'));
 };

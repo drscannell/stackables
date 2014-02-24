@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,400italic,600italic' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="style.css" />
-<link rel="stylesheet" href="style-colors.css" />
+<link rel="stylesheet" href="colors.css" />
 </head>
 <body>
 <div class="app" id="app">
@@ -64,6 +64,10 @@
 		<div class="buttons">
 			<span class="button-input">
 				<input type="button" 
+				class="button js-cancel" value="cancel" />
+			</span>
+			<span class="button-input">
+				<input type="button" 
 				class="button delete" value="{{archiveButtonValue}}" />
 			</span>
 			<span class="button-input">
@@ -108,10 +112,36 @@
 			<span class="text-input-label">email:</span>
 			<input type="text"
 			class="text edit-email" value="{{email}}" readonly />
-		</div>
+		</div>	
+	</form>
+	<form class="form">
+		<h2 class="form">Stacks</h2>
+		<ul class="stack-manager-list js-stack-manager-list"></ul>
 	</form>
 </script>
 
+
+<script type="text/x-handlebars-template" id="create-stack-template">
+	<header class="app">
+		<span class="button-input">
+			<input type="button" class="button js-cancel" value="cancel" />
+		</span>
+		<span class="button-input">
+			<input type="button" 
+			class="button close" value="save &amp; close" />
+		</span>
+	</header>
+	<form class="form">
+		<section class="form">
+			<h2 class="form">New Stack</h2>
+			<div class="text-input">
+				<span class="text-input-label">name:</span>
+				<input type="text" 
+				class="text js-stack-name" value="{{stackName}}" />
+			</div>
+		</section>
+	</form>
+</script>
 
 <script type="text/x-handlebars-template" id="edit-stack-template">
 	<header class="app">
@@ -144,12 +174,12 @@
 </script>
 
 
-<script src="libraries/json2.js"></script>
-<script src="libraries/jquery-2.0.3.js"></script>
-<script src="libraries/underscore.js"></script>
-<script src="libraries/backbone.js"></script>
-<script src="libraries/marked.js"></script>
-<script src="libraries/handlebars-v1.3.0.js"></script>
-<script src="client-app.js"></script>
+<script src="dependencies/json2.js"></script>
+<script src="dependencies/jquery-2.0.3.js"></script>
+<script src="dependencies/underscore.js"></script>
+<script src="dependencies/backbone.js"></script>
+<script src="dependencies/marked.js"></script>
+<script src="dependencies/handlebars-v1.3.0.js"></script>
+<script src="lib/client.js"></script>
 </body>
 </html>

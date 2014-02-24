@@ -96,14 +96,18 @@ input.button {
 	margin:1px 0 1px 0;
 	border:0;
 	height:50px;
-	width:90%;width:40%;
+	width:40%;
 	border-radius:5px;
 	-webkit-appearance: none;
 }
-input.b1 {height:50px;width:45%;font-size:1em;}
-input.b2 {height:50px;width:45%;font-size:1em;}
-input.b3 {height:50px;width:45%;font-size:1em;}
-input.b4 {height:50px;width:45%;font-size:1em;}
+input.small-button {
+	display:inline-block;
+	margin:1px 0 1px 0;
+	padding: 5px;
+	border:0;
+	border-radius:2px;
+	-webkit-appearance: none;
+}
 input.edit-note-button {
 	height:35px;
 	width:100px;
@@ -160,4 +164,13 @@ textarea.textarea {
 	min-height:24em;
 }
 
+
+ul.stack-manager-list {
+	list-style-type: none;
+}
+li.stack-manager-list {
+	text-align:left;
+	padding:0;
+	margin-bottom:5px;
+}
 
