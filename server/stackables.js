@@ -179,8 +179,8 @@ module.exports = function(models){
 	stackables.getStacksByIdArray = function(idArray, callback) {
 		models.Stack.find({'_id': {$in:idArray}}, function(err, stacks) {
 			if (!err) {
+				// add isDeleted attr if missing
 				for(var i = 0; i < stacks.length; i++) {
-					console.log(i + '. ' + stacks[i].name);
 					if(!('isDeleted' in stacks[i])) {
 						stacks[i].isDeleted = false;
 					}
