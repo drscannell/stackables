@@ -7,6 +7,7 @@ var UserEditView = Backbone.View.extend({
 	className: 'edit-user-pane',
 	template: Handlebars.compile( $('#edit-user-template').html() ),
 	initialize: function(options) {
+		this.stacksCollection = options.stacksCollection;
 		this.listenTo(this.model, 'invalid', this.reportValidationErrors);
 		console.log('getStacks()');
 		console.log(this.model.getStacks());
@@ -42,9 +43,17 @@ var UserEditView = Backbone.View.extend({
 		$('#app').hide();
 		var context = {
 			'username':this.model.getUsername(), 
-			'email':this.model.getEmail()
+			'email':this.model.getEmail(),
+			'stacksCollection':this.stacksCollection
 		};
 		this.$el.html(this.template(context));
+		var _this = this;
+		this.stacksCollection.each(function(stack) {
+			view = new StackManagerView({
+				'model': stack
+			});
+			$('.js-stack-manager-list', _this.$el).append(view.render().$el);
+		});
 		return this; 
 	}
 });

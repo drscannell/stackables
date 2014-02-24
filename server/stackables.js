@@ -179,6 +179,12 @@ module.exports = function(models){
 	stackables.getStacksByIdArray = function(idArray, callback) {
 		models.Stack.find({'_id': {$in:idArray}}, function(err, stacks) {
 			if (!err) {
+				for(var i = 0; i < stacks.length; i++) {
+					console.log(i + '. ' + stacks[i].name);
+					if(!('isDeleted' in stacks[i])) {
+						stacks[i].isDeleted = false;
+					}
+				}
 				callback(null, stacks);
 			} else {
 				console.log(err);

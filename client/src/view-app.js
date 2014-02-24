@@ -12,6 +12,7 @@ var AppView = Backbone.View.extend({
 		this.stacksCollection = options.stacksCollection;
 		this.listenTo(this.notesCollection, 'add', this.addNoteView);
 		this.listenTo(this.stacksCollection, 'add', this.addStackDropdownView);
+		this.listenTo(this.stacksCollection, 'change', this.refreshStackDropdownView);
 		this.listenTo(this.userModel, 'change', this.userChange);
 		this.isShowingArchive = false;
 	},
@@ -61,12 +62,25 @@ var AppView = Backbone.View.extend({
 	},
 	addStackDropdownView: function(stack) {
 		console.log('add stack dropdown view');
-		var view = new StackDropdownView({'model':stack});
-		$('.js-stack-select').append(view.render().$el);
-		this.stackViews.push(view);
+		if (stack.getDeleted() == false) {
+			var view = new StackDropdownView({'model':stack});
+			$('.js-stack-select').append(view.render().$el);
+			this.stackViews.push(view);
+		}
+	},
+	refreshStackDropdownView: function(stack) {
+		console.log('refresh stack dropdown view');
+		var _this = this;
+		$('.js-stack-select').empty();
+		this.stacksCollection.each(function(stack) {
+			_this.addStackDropdownView(stack);
+		});
 	},
 	showSettingsView: function(){
-		var editView = new UserEditView({'model':this.userModel});
+		var editView = new UserEditView({
+			'model':this.userModel,
+			'stacksCollection':this.stacksCollection
+		});
 		$('body').append(editView.render().$el);
 			
 	},

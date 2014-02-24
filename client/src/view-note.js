@@ -78,8 +78,10 @@ var NoteEditView = Backbone.View.extend({
 		var that = this;
 		// create subview for each stack in list
 		this.stacksCollection.each(function(stack) {
-			var view = new StackDropdownView({'model':stack});
-			that.stackDropdownViews.push(view);
+			if (stack.getDeleted() == false) {
+				var view = new StackDropdownView({'model':stack});
+				that.stackDropdownViews.push(view);
+			}
 		});
 		this.listenTo(this.model, 'change', this.render);
 	},

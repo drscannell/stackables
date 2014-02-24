@@ -6,9 +6,8 @@ var Stack = Backbone.Model.extend({
 	defaults: {
 		'name':'Untitled Stack',
 		'notes':[],
-		'deleted':false
+		'isDeleted':false
 	},
-	//url: '/stack',
 	url: function(){
 		return '/stack?id=' + this.get('_id');
 	},
@@ -22,10 +21,10 @@ var Stack = Backbone.Model.extend({
 		this.set('name', name);
 	},
 	getDeleted: function() {
-		return this.get('deleted');
+		return this.get('isDeleted');
 	},
 	setDeleted: function(trueFalse) {
-		this.set('deleted', trueFalse);
+		this.set('isDeleted', trueFalse);
 	},
 	getNotes: function() {
 		return this.get('notes');

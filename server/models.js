@@ -39,7 +39,8 @@ module.exports = function() {
 
 	var stackSchema = mongoose.Schema({
 		'name':String,
-		'notes':Array
+		'notes':Array,
+		'isDeleted':Boolean
 	}, {'collection':'stacks'});
 	models.Stack = mongoose.model('Stack', stackSchema);
 	return models;

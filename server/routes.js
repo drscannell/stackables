@@ -86,6 +86,8 @@ module.exports = function(app, stackables) {
 	});
 
 	app.post('/stack', function(req, res){
+		console.log('post /stack');
+		console.log(req.body);
 		if ( '_id' in req.body ) {
 			stackables.updateStack(req.body, function(err, stack) {
 				if (!err) {
