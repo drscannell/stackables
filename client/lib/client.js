@@ -1,35 +1,3 @@
-
-/*
- * @class User
- * @extends Backbone.Model
- */
-var User = Backbone.Model.extend({
-	url: '/user',
-	getUsername: function() {
-		return this.get('username');
-	},
-	setUsername: function(username) {
-		this.set('username', username);
-	},
-	getEmail: function() {
-		return this.get('email');
-	},
-	setEmail: function(email) {
-		this.set('email',email);
-	},
-	getStacks: function() {
-		return this.get('stacks');
-	},
-	addStack: function(stackModel) {
-		var obj = {
-			'stackId':stackModel.getId(),
-			'name':stackModel.getName()
-		};
-		this.get('stacks').push(obj);
-		
-	}
-});
-
 /*
  * @class Note
  * @extends Backbone.Model
@@ -77,7 +45,6 @@ var Note = Backbone.Model.extend({
 		}
 	}
 });
-
 /**
  * @class Stack
  * @extends Backbone.Model
@@ -132,6 +99,36 @@ var Stack = Backbone.Model.extend({
 	}
 });
 
+/*
+ * @class User
+ * @extends Backbone.Model
+ */
+var User = Backbone.Model.extend({
+	url: '/user',
+	getUsername: function() {
+		return this.get('username');
+	},
+	setUsername: function(username) {
+		this.set('username', username);
+	},
+	getEmail: function() {
+		return this.get('email');
+	},
+	setEmail: function(email) {
+		this.set('email',email);
+	},
+	getStacks: function() {
+		return this.get('stacks');
+	},
+	addStack: function(stackModel) {
+		var obj = {
+			'stackId':stackModel.getId(),
+			'name':stackModel.getName()
+		};
+		this.get('stacks').push(obj);
+		
+	}
+});
 
 /*
  * @class StackList
@@ -166,67 +163,101 @@ var NoteList = Backbone.Collection.extend({
 		this.fetch();
 	}
 });
-
 /*
- * @class UserEditView 
+ * @class AppView
  * @extends Backbone.View
  */
-var UserEditView = Backbone.View.extend({
-	tagName: 'div',
-	className: 'edit-user-pane',
-	template: Handlebars.compile( $('#edit-user-template').html() ),
+var AppView = Backbone.View.extend({
+	el: $('#app'),
 	initialize: function(options) {
+		this.stackViews = [];
+		this.userModel = new User();
+		this.userModel.fetch();
+		this.notesCollection = options.notesCollection;
 		this.stacksCollection = options.stacksCollection;
-		this.listenTo(this.model, 'invalid', this.reportValidationErrors);
-		console.log('getStacks()');
-		console.log(this.model.getStacks());
+		this.listenTo(this.notesCollection, 'add', this.addNoteView);
+		this.listenTo(this.stacksCollection, 'add', this.addStackDropdownView);
+		this.listenTo(this.stacksCollection, 'change', this.refreshStackDropdownView);
+		this.listenTo(this.userModel, 'change', this.userChange);
+		this.isShowingArchive = false;
 	},
 	events: {
-		'click input.close': 'saveAndClose'
+		'click input.js-add-note': 'addNewNote',
+		'click input.js-add-stack': 'addNewStack',
+		'click input.js-logout': 'logout',
+		'click input.js-settings': 'showSettingsView',
+		'change select.js-stack-select': 'showStack'
 	},
-	saveAndClose: function(event) {
+	showStack: function(event) {
 		event.stopPropagation();
-		this.updateModel();
-		if (this.model.save()) {
-			$('#app').show();
-			this.remove();
+		$('#notes').empty();
+		var stackId = $(event.currentTarget).val();
+		this.isShowingArchive = (stackId == 'archived');
+		this.notesCollection = new NoteList([], {'stackId':stackId});
+		this.listenTo(this.notesCollection, 'add', this.addNoteView);
+	},
+	addNewNote: function() {
+		var note = new Note();
+		var view = new NoteEditView({
+			'isNew':true,
+			'model':note,
+			'stacksCollection':this.stacksCollection,
+			'notesCollection':this.notesCollection
+		});
+		$('body').append(view.render().$el);
+	},
+	addNewStack: function() {
+		console.log('add new stack');
+		var stack = new Stack();
+		var view = new StackCreateView({
+			'model':stack, 
+			'userModel':this.userModel,
+			'stacksCollection':this.stacksCollection
+		});
+		$('body').append(view.render().$el);
+	},
+	addNoteView: function(note) {
+		var view = new NoteView({
+			'model':note, 
+			'stacksCollection':this.stacksCollection,
+			'showUnarchivedNotes':(this.isShowingArchive == false),
+			'showArchivedNotes':(this.isShowingArchive == true)
+		});
+		$('#notes').prepend(view.render().$el);
+	},
+	addStackDropdownView: function(stack) {
+		console.log('add stack dropdown view');
+		if (stack.getDeleted() == false) {
+			var view = new StackDropdownView({'model':stack});
+			$('.js-stack-select').append(view.render().$el);
+			this.stackViews.push(view);
 		}
 	},
-	updateModel: function() {
-		var email = $('.edit-email', this.$el).first().val();
-		this.model.setEmail(email);
+	refreshStackDropdownView: function(stack) {
+		console.log('refresh stack dropdown view');
+		var _this = this;
+		$('.js-stack-select').empty();
+		this.stacksCollection.each(function(stack) {
+			_this.addStackDropdownView(stack);
+		});
 	},
-	markAllInputsValid: function() {
-		$('.js-input-container', this.$el)
-			.removeClass('error')
-			.addClass('success');
+	showSettingsView: function(){
+		var editView = new UserEditView({
+			'model':this.userModel,
+			'stacksCollection':this.stacksCollection
+		});
+		$('body').append(editView.render().$el);
+			
 	},
-	reportValidationErrors: function(model, errors) {
-		$('.text-input', this.$el).removeClass('error').addClass('success');
-		_.each(errors, function(error, i) {
-			var query = '.' + error.class;
-			$(query, this.$el).addClass('error');
+	logout: function() {
+		jQuery.post('logout', function(data) {
+			location.reload();
 		});
 	},
 	render: function() {
-		$('#app').hide();
-		var context = {
-			'username':this.model.getUsername(), 
-			'email':this.model.getEmail(),
-			'stacksCollection':this.stacksCollection
-		};
-		this.$el.html(this.template(context));
-		var _this = this;
-		this.stacksCollection.each(function(stack) {
-			view = new StackManagerView({
-				'model': stack
-			});
-			$('.js-stack-manager-list', _this.$el).append(view.render().$el);
-		});
-		return this; 
-	}
+		
+	} 
 });
-
 /*
  * @class NoteView
  * @extends Backbone.View
@@ -413,7 +444,6 @@ var NoteEditView = Backbone.View.extend({
 		return this; 
 	}
 });
-
 
 
 /*
@@ -635,103 +665,65 @@ var StackEditView = Backbone.View.extend({
 		return this; 
 	}
 });
-
 /*
- * @class AppView
+ * @class UserEditView 
  * @extends Backbone.View
  */
-var AppView = Backbone.View.extend({
-	el: $('#app'),
+var UserEditView = Backbone.View.extend({
+	tagName: 'div',
+	className: 'edit-user-pane',
+	template: Handlebars.compile( $('#edit-user-template').html() ),
 	initialize: function(options) {
-		this.stackViews = [];
-		this.userModel = new User();
-		this.userModel.fetch();
-		this.notesCollection = options.notesCollection;
 		this.stacksCollection = options.stacksCollection;
-		this.listenTo(this.notesCollection, 'add', this.addNoteView);
-		this.listenTo(this.stacksCollection, 'add', this.addStackDropdownView);
-		this.listenTo(this.stacksCollection, 'change', this.refreshStackDropdownView);
-		this.listenTo(this.userModel, 'change', this.userChange);
-		this.isShowingArchive = false;
+		this.listenTo(this.model, 'invalid', this.reportValidationErrors);
+		console.log('getStacks()');
+		console.log(this.model.getStacks());
 	},
 	events: {
-		'click input.js-add-note': 'addNewNote',
-		'click input.js-add-stack': 'addNewStack',
-		'click input.js-logout': 'logout',
-		'click input.js-settings': 'showSettingsView',
-		'change select.js-stack-select': 'showStack'
+		'click input.close': 'saveAndClose'
 	},
-	showStack: function(event) {
+	saveAndClose: function(event) {
 		event.stopPropagation();
-		$('#notes').empty();
-		var stackId = $(event.currentTarget).val();
-		this.isShowingArchive = (stackId == 'archived');
-		this.notesCollection = new NoteList([], {'stackId':stackId});
-		this.listenTo(this.notesCollection, 'add', this.addNoteView);
-	},
-	addNewNote: function() {
-		var note = new Note();
-		var view = new NoteEditView({
-			'isNew':true,
-			'model':note,
-			'stacksCollection':this.stacksCollection,
-			'notesCollection':this.notesCollection
-		});
-		$('body').append(view.render().$el);
-	},
-	addNewStack: function() {
-		console.log('add new stack');
-		var stack = new Stack();
-		var view = new StackCreateView({
-			'model':stack, 
-			'userModel':this.userModel,
-			'stacksCollection':this.stacksCollection
-		});
-		$('body').append(view.render().$el);
-	},
-	addNoteView: function(note) {
-		var view = new NoteView({
-			'model':note, 
-			'stacksCollection':this.stacksCollection,
-			'showUnarchivedNotes':(this.isShowingArchive == false),
-			'showArchivedNotes':(this.isShowingArchive == true)
-		});
-		$('#notes').prepend(view.render().$el);
-	},
-	addStackDropdownView: function(stack) {
-		console.log('add stack dropdown view');
-		if (stack.getDeleted() == false) {
-			var view = new StackDropdownView({'model':stack});
-			$('.js-stack-select').append(view.render().$el);
-			this.stackViews.push(view);
+		this.updateModel();
+		if (this.model.save()) {
+			$('#app').show();
+			this.remove();
 		}
 	},
-	refreshStackDropdownView: function(stack) {
-		console.log('refresh stack dropdown view');
-		var _this = this;
-		$('.js-stack-select').empty();
-		this.stacksCollection.each(function(stack) {
-			_this.addStackDropdownView(stack);
-		});
+	updateModel: function() {
+		var email = $('.edit-email', this.$el).first().val();
+		this.model.setEmail(email);
 	},
-	showSettingsView: function(){
-		var editView = new UserEditView({
-			'model':this.userModel,
-			'stacksCollection':this.stacksCollection
-		});
-		$('body').append(editView.render().$el);
-			
+	markAllInputsValid: function() {
+		$('.js-input-container', this.$el)
+			.removeClass('error')
+			.addClass('success');
 	},
-	logout: function() {
-		jQuery.post('logout', function(data) {
-			location.reload();
+	reportValidationErrors: function(model, errors) {
+		$('.text-input', this.$el).removeClass('error').addClass('success');
+		_.each(errors, function(error, i) {
+			var query = '.' + error.class;
+			$(query, this.$el).addClass('error');
 		});
 	},
 	render: function() {
-		
-	} 
+		$('#app').hide();
+		var context = {
+			'username':this.model.getUsername(), 
+			'email':this.model.getEmail(),
+			'stacksCollection':this.stacksCollection
+		};
+		this.$el.html(this.template(context));
+		var _this = this;
+		this.stacksCollection.each(function(stack) {
+			view = new StackManagerView({
+				'model': stack
+			});
+			$('.js-stack-manager-list', _this.$el).append(view.render().$el);
+		});
+		return this; 
+	}
 });
-
 function main() {
 	
 	/*

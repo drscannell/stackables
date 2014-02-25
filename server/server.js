@@ -26,7 +26,9 @@ db.once('open', function(){
 
 	require('./routes.js')(app, stackables);
 
-	app.listen(process.env.PORT || 8000);
+	var port = process.env.PORT || 8000;
+	console.log('Server running at http://localhost:' + port);
+	app.listen(port);
 
 });
 

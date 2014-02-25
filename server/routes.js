@@ -6,7 +6,6 @@ module.exports = function(app, stackables) {
 	app.use(express.cookieParser('321!!'));
 	app.use(function(req,res,next){
 		console.log('\n' + req.method + ' ' + req.url);
-		console.log('  username: ' + stackables.getUserIdFromCookie(req) );
 		next();
 	});
 
@@ -18,7 +17,6 @@ module.exports = function(app, stackables) {
 		} else if ( req.url == '/login' ) {
 			next();
 		} else {
-			console.log('  not logged in. Sending login page.');
 			res.sendfile('client/login.html');
 		}
 	});
@@ -54,10 +52,8 @@ module.exports = function(app, stackables) {
 				}
 			});
 		} else if (stackId && stackId == 'archived') {
-			console.log('  requested archived notes');
 			stackables.getAllArchivedNotes(req, res, 1);
 		} else {
-			console.log('  No stack id specified.');
 			stackables.getAllNotes(req, res, 1);
 		}
 	});
@@ -91,20 +87,16 @@ module.exports = function(app, stackables) {
 		if ( '_id' in req.body ) {
 			stackables.updateStack(req.body, function(err, stack) {
 				if (!err) {
-					console.log('  Successfully updated stack');
 					res.status(200).send(stack);
 				} else {
-					console.log('  Failed to update stack');
 					res.status(501).send(err);
 				}
 			});
 		} else {
 			stackables.addStack(req.body, function(err, stack) {
 				if (!err) {
-					console.log('  Successfully added stack');
 					res.status(200).send(stack);
 				} else {
-					console.log('  Failed to add stack');
 					res.status(501).send(err);
 				}
 			});
@@ -140,17 +132,6 @@ module.exports = function(app, stackables) {
 
 	app.get('/', function(req, res) {
 		res.sendfile('client/index.html');
-	});
-
-	app.get('/lib/client.js', function(req, res) {
-		stackables.getClientApp(function(err, path) {
-			if (!err) {
-				res.set('Content-Type', 'text/javascript');
-				res.sendfile(path);
-			} else {
-				res.status(500).send(err);
-			}
-		});
 	});
 
 	app.use(express.directory('client'));
