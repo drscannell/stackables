@@ -10,6 +10,7 @@ build = (callback) ->
 		"> client/lib/client.js"
 	child = exec cmd
 	child.stdout.on 'data', (data) -> console.log data.trim()
+	child.stderr.on 'data', (data) -> console.log data.trim()
 	child.on 'exit', (status) ->
 		callback() if callback
 
@@ -17,6 +18,7 @@ runServer = (callback) ->
 	cmd = "node server/server.js"
 	child = exec cmd
 	child.stdout.on 'data', (data) -> console.log data.trim()
+	child.stderr.on 'data', (data) -> console.log data.trim()
 	child.on 'exit', (status) ->
 		callback() if callback
 
