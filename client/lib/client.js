@@ -173,13 +173,14 @@ var AppView = Backbone.View.extend({
 		this.stackViews = [];
 		this.userModel = new User();
 		this.userModel.fetch();
-		this.notesCollection = options.notesCollection;
+		this.allNotesCollection = options.notesCollection;
+		this.displayStack('all');
 		this.stacksCollection = options.stacksCollection;
-		this.listenTo(this.notesCollection, 'add', this.addNoteView);
+		//this.listenTo(this.notesCollection, 'add', this.addNoteView);
 		this.listenTo(this.stacksCollection, 'add', this.addStackDropdownView);
 		this.listenTo(this.stacksCollection, 'change', this.refreshStackDropdownView);
 		this.listenTo(this.userModel, 'change', this.userChange);
-		this.isShowingArchive = false;
+		//this.isShowingArchive = false;
 	},
 	events: {
 		'click input.js-add-note': 'addNewNote',
@@ -192,11 +193,20 @@ var AppView = Backbone.View.extend({
 		event.stopPropagation();
 		$('#notes').empty();
 		var stackId = $(event.currentTarget).val();
+		//this.isShowingArchive = (stackId == 'archived');
+		//this.notesCollection = new NoteList([], {'stackId':stackId});
+		//this.listenTo(this.notesCollection, 'add', this.addNoteView);
+		this.displayStack(stackId);
+	},
+	displayStack: function(stackId) {
+		this.stopListening(this.notesCollection, 'add');
+		$('#notes').empty();
 		this.isShowingArchive = (stackId == 'archived');
 		this.notesCollection = new NoteList([], {'stackId':stackId});
 		this.listenTo(this.notesCollection, 'add', this.addNoteView);
 	},
 	addNewNote: function() {
+		console.log('addnewnote');
 		var note = new Note();
 		var view = new NoteEditView({
 			'isNew':true,
@@ -366,6 +376,7 @@ var NoteEditView = Backbone.View.extend({
 		});
 	},
 	toggleCollectionMembership: function(event) {
+		// TODO: don't automatically save in this method
 		event.stopPropagation();
 		console.log('NoteEditView.toggleCollectionMembership');
 		var view = this;

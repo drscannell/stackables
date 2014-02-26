@@ -106,6 +106,7 @@ var NoteEditView = Backbone.View.extend({
 		});
 	},
 	toggleCollectionMembership: function(event) {
+		// TODO: don't automatically save in this method
 		event.stopPropagation();
 		console.log('NoteEditView.toggleCollectionMembership');
 		var view = this;
