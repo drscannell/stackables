@@ -1,4 +1,13 @@
-{spawn, exec} = require 'child_process'
+{exec} = require 'child_process'
+
+# ------------ helper ------------
+
+runscript = (cmd, callback) ->
+	child = exec cmd
+	child.stdout.on 'data', (data) -> console.log data.trim()
+	child.stderr.on 'data', (data) -> console.log data.trim()
+	child.on 'exit', (status) ->
+		callback?()
 
 # ------------ subtasks ------------
 
@@ -8,17 +17,11 @@ build = (callback) ->
 		"client/src/view*.js " +
 		"client/src/main.js " +
 		"> client/lib/client.js"
-	child = exec cmd
-	child.stdout.on 'data', (data) -> console.log data.trim()
-	child.on 'exit', (status) ->
-		callback() if callback
+	runscript(cmd, callback)
 
 runServer = (callback) ->
 	cmd = "node server/server.js"
-	child = exec cmd
-	child.stdout.on 'data', (data) -> console.log data.trim()
-	child.on 'exit', (status) ->
-		callback() if callback
+	runscript(cmd, callback)
 
 # ------------ command line tasks ------------
 
@@ -28,11 +31,11 @@ task 'build', buildDescrip, (options) ->
 	build ->
 		console.log 'client.js built'
 
-# cake try1
+# cake try
 task 'try', 'run server', (options) ->
 	build ->
 		console.log 'client.js built'
-		runServer ->
+		runServer()
 
 	
 
