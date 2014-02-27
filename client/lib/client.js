@@ -379,24 +379,42 @@ var NoteEditView = Backbone.View.extend({
 		this.listenTo(this.model, 'change', this.render);
 	},
 	events: {
-		'click input.delete': 'deleteNote',
+		'click input.delete': 'handleArchiveClick',
 		'click input.close': 'saveAndCloseNote',
 		'click input.js-cancel': 'cancel',
 		'change select.js-add-to-stack-select': 'handleStackToggle'
 	},
 	cancel: function(event) {
 		event.stopPropagation();
-		$('#app').show();
-		this.remove();
-	},
-	deleteNote: function(event) {
-		event.stopPropagation();
-		var _this = this;
-		this.model.setDeleted();
-		this.saveNote(function(err, success) {
+		console.log('cancel');
+		if (this.isNew) {
+			console.log('aborting new note');
+			// if aborting new note, delete
+			this.deleteNote();
+		} else {
+			console.log('simple cancel');
 			$('#app').show();
-			_this.remove();
-		});
+			this.remove();
+		}
+	},
+	handleArchiveClick: function(event) {
+		event.stopPropagation();
+		this.deleteNote();
+	},
+	deleteNote: function() {
+		console.log('---deleteNOte---');
+		if (this.model.getId()) {
+			var _this = this;
+			this.model.setDeleted();
+			this.saveNote(function(err, success) {
+				$('#app').show();
+				_this.remove();
+			});
+		} else {
+			$('#app').show();
+			this.remove();
+		}
+		console.log('+++deleteNote+++');
 	},
 	handleStackToggle: function(event) {
 		event.stopPropagation();
@@ -415,7 +433,7 @@ var NoteEditView = Backbone.View.extend({
 					var stackDropdownView = _this.stackDropdownViews[i];
 					if (selected === $(stackDropdownView.$el).get(0)) {
 						console.log('  Invoking method of subview');
-						stackDropdownView.toggleNoteMembership(_this.model);
+						//stackDropdownView.toggleNoteMembership(_this.model);
 						var stackModel = stackDropdownView.model;
 						_this.toggleStackMembership(stackModel)
 						_this.render();
@@ -426,70 +444,86 @@ var NoteEditView = Backbone.View.extend({
 	},
 	toggleStackMembership: function(stackModel) {
 		console.log('---NoteEditView.toggleStackMembership---');
-		console.log(stackModel);
 		stackModel.toggleNoteMembership(this.model);
+		this.saveModel(stackModel, function(err, success) {
+			if (!err) {
+				console.log('saved stack');
+			} else {
+				console.log('failed to save stack');
+				console.log(err);
+			}
+		});
 	},
 	addToCollection: function(stackModel) {
 		console.log('---NoteEditView.addToCollection---');
 		stackModel.addNote(this.model);
+		this.saveModel(stackModel, function(err, success) {
+			if (!err) {
+				console.log('saved stack');
+			} else {
+				console.log('failed to save stack');
+				console.log(err);
+			}
+		});
 	},
 	removeFromCollection: function(stackModel) {
 		console.log('---NoteEditView.removeFromCollection---');
 		stackModel.removeNote(this.model);
+		this.saveModel(stackModel, function(err, success) {
+			if (!err) {
+				console.log('saved stack');
+			} else {
+				console.log('failed to save stack');
+				console.log(err);
+			}
+		});
 	},
 	saveNote: function(callback) {
-		console.log('Attempting to save note');
+		// gather values from UI
 		var name = $('.edit-name', this.$el).first().val();
 		var markdown = $('.edit-markdown', this.$el).first().val();
 		this.model.setName(name);
 		this.model.setMarkdown(markdown);
-		this.saveModel(this.model, callback);
-		/*
+		// save to database
 		var _this = this;
-		this.model.save(undefined,{
-			error:function(model, xhr, options) {
+		this.saveModel(this.model, function(err, success) {
+			if (!err) {
+				console.log('Saved note');
+			} else {
 				console.log('Failed to save note');
-				console.log(xhr);
-				callback('Failed to save note', false);
-			},
-			success:function(model, response, options){
-				console.log('Successfully saved note');
-				callback(null, true);
-				if (_this.isNew) {
-					console.log('Adding to notes collection');
-					_this.notesCollection.add(model);
-				}
+				console.log(err);
 			}
+			if (callback)
+				callback(err, success);
 		});
-		*/
 	},
 	saveModel: function(model, callback) {
+		// generic model saving method
 		var _this = this;
-		this.model.save(undefined,{
+		model.save(undefined,{
 			error:function(model, xhr, options) {
-				console.log('Failed to save note');
 				console.log(xhr);
 				if (callback)
-					callback('Failed to save note', false);
+					callback('Failed to save model', false);
 			},
 			success:function(model, response, options){
-				console.log('Successfully saved note');
 				if (callback)
 					callback(null, true);
-				if (_this.isNew) {
-					console.log('Adding to notes collection');
-					_this.notesCollection.add(model);
-				}
 			}
 		});
 	},
 	saveAndCloseNote: function(event) {
 		event.stopPropagation();
-		var view = this;
+		var _this = this;
 		this.saveNote(function(err, success) {
-			
+			if (!err) {
+				if (_this.isNew) {
+					console.log('Adding to notes collection');
+					_this.notesCollection.add(model);
+				}
+			}			
 			$('#app').show();
-			view.remove();
+			_this.remove();
 		});
 	},
 	render: function() {
