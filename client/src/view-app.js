@@ -37,11 +37,14 @@ var AppView = Backbone.View.extend({
 		this.stopListening(this.notesCollection, 'add');
 		$('#notes').empty();
 		this.isShowingArchive = (stackId == 'archived');
+		console.log('---AppView.displayStack---');
 		this.notesCollection = new NoteList([], {'stackId':stackId});
+		console.log(this.notesCollection);
 		this.listenTo(this.notesCollection, 'add', this.addNoteView);
 	},
 	addNewNote: function() {
-		console.log('addnewnote');
+		console.log('---addnewnote---');
+		console.log(this.notesCollection);
 		var note = new Note();
 		var view = new NoteEditView({
 			'isNew':true,

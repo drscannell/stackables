@@ -72,6 +72,8 @@ var NoteEditView = Backbone.View.extend({
 	template: Handlebars.compile( $('#edit-note-template').html() ),
 	initialize: function(options) {
 		this.isNew = options.isNew;
+		console.log('---initialize NoteEditView---');
+		console.log(options.notesCollection);
 		this.stacksCollection = options.stacksCollection;
 		this.notesCollection = options.notesCollection;
 		this.stackDropdownViews = [];
@@ -89,7 +91,7 @@ var NoteEditView = Backbone.View.extend({
 		'click input.delete': 'deleteNote',
 		'click input.close': 'saveAndCloseNote',
 		'click input.js-cancel': 'cancel',
-		'change select.js-add-to-stack-select': 'toggleCollectionMembership'
+		'change select.js-add-to-stack-select': 'handleStackToggle'
 	},
 	cancel: function(event) {
 		event.stopPropagation();
@@ -105,27 +107,44 @@ var NoteEditView = Backbone.View.extend({
 			_this.remove();
 		});
 	},
-	toggleCollectionMembership: function(event) {
-		// TODO: don't automatically save in this method
+	handleStackToggle: function(event) {
 		event.stopPropagation();
-		console.log('NoteEditView.toggleCollectionMembership');
-		var view = this;
+		console.log('NoteEditView.handleStackToggle');
+		var selected = $('option', this.$el).filter(':selected').get(0);
+		console.log('selected:');
+		console.log(selected);
+		var _this = this;
 		this.saveNote(function(err, success) {
 			if (!err) {
-				var selected = $('option', view.$el).filter(':selected').get(0);
+				var selected = $('option', _this.$el).filter(':selected').get(0);
 				console.log('selected:');
 				console.log(selected);
 				// which stack view was interacted with?
-				for(var i = 0; i < view.stackDropdownViews.length; i++) {
-					var stackDropdownView = view.stackDropdownViews[i];
+				for(var i = 0; i < _this.stackDropdownViews.length; i++) {
+					var stackDropdownView = _this.stackDropdownViews[i];
 					if (selected === $(stackDropdownView.$el).get(0)) {
 						console.log('  Invoking method of subview');
-						stackDropdownView.toggleNoteMembership(view.model);
-						view.render();
+						stackDropdownView.toggleNoteMembership(_this.model);
+						var stackModel = stackDropdownView.model;
+						_this.toggleStackMembership(stackModel)
+						_this.render();
 					}
 				}
 			}	
 		});
+	},
+	toggleStackMembership: function(stackModel) {
+		console.log('---NoteEditView.toggleStackMembership---');
+		console.log(stackModel);
+		stackModel.toggleNoteMembership(this.model);
+	},
+	addToCollection: function(stackModel) {
+		console.log('---NoteEditView.addToCollection---');
+		stackModel.addNote(this.model);
+	},
+	removeFromCollection: function(stackModel) {
+		console.log('---NoteEditView.removeFromCollection---');
+		stackModel.removeNote(this.model);
 	},
 	saveNote: function(callback) {
 		console.log('Attempting to save note');
@@ -133,16 +152,21 @@ var NoteEditView = Backbone.View.extend({
 		var markdown = $('.edit-markdown', this.$el).first().val();
 		this.model.setName(name);
 		this.model.setMarkdown(markdown);
+		this.saveModel(this.model, callback);
+	},
+	saveModel: function(model, callback) {
 		var _this = this;
 		this.model.save(undefined,{
 			error:function(model, xhr, options) {
 				console.log('Failed to save note');
 				console.log(xhr);
-				callback('Failed to save note', false);
+				if (callback)
+					callback('Failed to save note', false);
 			},
 			success:function(model, response, options){
 				console.log('Successfully saved note');
-				callback(null, true);
+				if (callback)
+					callback(null, true);
 				if (_this.isNew) {
 					console.log('Adding to notes collection');
 					_this.notesCollection.add(model);
