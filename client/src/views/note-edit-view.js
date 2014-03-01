@@ -53,13 +53,12 @@ var NoteEditView = ControllerView.extend({
 	},
 	handleCancel: function(event) {
 		event.stopPropagation();
-		console.log('cancel');
 		if (this.options.isNew) {
-			console.log('aborting new note');
+			console.log('cancel: aborting new note');
 			// if aborting new note, delete
 			this.deleteNote();
 		} else {
-			console.log('simple cancel');
+			console.log('cancel: simply removing view');
 			$('#app').show();
 			this.remove();
 		}

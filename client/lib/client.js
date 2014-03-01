@@ -80,7 +80,6 @@ var Stack = Backbone.Model.extend({
 		this.set('notes', notes);
 	},
 	addNote: function(noteModel) {
-		console.log('Stack.addNote');
 		var noteId = noteModel.getId();
 		var notes = this.get('notes')
 		var index = notes.indexOf(noteId);
@@ -89,7 +88,6 @@ var Stack = Backbone.Model.extend({
 		} 
 	},
 	removeNote: function(noteModel) {
-		console.log('Stack.removeNote');
 		var noteId = noteModel.getId();
 		var notes = this.get('notes')
 		var index = notes.indexOf(noteId);
@@ -98,7 +96,6 @@ var Stack = Backbone.Model.extend({
 		}
 	},
 	toggleNoteMembership: function(noteModel) {
-		console.log('Stack.toggleNoteMembership');
 		var noteId = noteModel.getId();
 		var notes = this.get('notes')
 		var index = notes.indexOf(noteId);
@@ -764,11 +761,9 @@ var StackMembershipView = ControllerView.extend({
 		this.listenTo(this.model, 'change', this.handleModelChange);
 	},
 	setChecked: function(shouldCheck) {
-		console.log('StackMembershipView.setChecked');
 		this.options.isChecked = shouldCheck;
 	},
 	handleModelChange: function() {
-		console.log('StackMembershipView.handleModelChange');
 		if ( this.model.getDeleted() ) {
 			this.remove();
 		} else {
@@ -776,7 +771,6 @@ var StackMembershipView = ControllerView.extend({
 		}
 	},
 	render: function() {
-		console.log('StackMembershipView.render');
 		var name = this.model.getName();
 		var display = name;
 		if ('isChecked' in this.options && this.options.isChecked) {
