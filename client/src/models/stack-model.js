@@ -32,8 +32,23 @@ var Stack = Backbone.Model.extend({
 	setNotes: function(notes) {
 		this.set('notes', notes);
 	},
+	addNote: function(noteModel) {
+		var noteId = noteModel.getId();
+		var notes = this.get('notes')
+		var index = notes.indexOf(noteId);
+		if (index == -1) {
+			notes.push(noteId);
+		} 
+	},
+	removeNote: function(noteModel) {
+		var noteId = noteModel.getId();
+		var notes = this.get('notes')
+		var index = notes.indexOf(noteId);
+		if (index != -1) {
+			notes.splice(index, 1);
+		}
+	},
 	toggleNoteMembership: function(noteModel) {
-		console.log('Stack.toggleNoteMembership');
 		var noteId = noteModel.getId();
 		var notes = this.get('notes')
 		var index = notes.indexOf(noteId);

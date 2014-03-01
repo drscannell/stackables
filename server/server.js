@@ -4,7 +4,7 @@ var app = require('express')();
 var mongoose = require('mongoose');
 
 // mongo connect
-var mongoURI = process.env.MONGO_LAB_URI || process.env.MONGOLAB_URI || process.env.LOCAL_MONGO_URI  || null;
+var mongoURI = process.env.LOCAL_MONGO_URI || process.env.MONGOLAB_URI ||  null;
 
 if (mongoURI == null) 
 	throw new Error('Mongo URI environment variable not set up');
