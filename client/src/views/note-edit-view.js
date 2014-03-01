@@ -26,13 +26,13 @@ var NoteEditView = Backbone.View.extend({
 		}
 	},
 	populateStackDropdown: function(stacksCollection) {
-		this.stackDropdownViews = [];
+		this.stackMembershipViews = [];
 		var _this = this;
 		// create subview for each stack in list
 		this.stacksCollection.each(function(stack) {
 			if (stack.getDeleted() == false) {
-				var view = new StackDropdownView({'model':stack});
-				_this.stackDropdownViews.push(view);
+				var view = new StackMembershipView({'model':stack});
+				_this.stackMembershipViews.push(view);
 			}
 		});
 	},
@@ -87,12 +87,12 @@ var NoteEditView = Backbone.View.extend({
 				console.log('selected:');
 				console.log(selected);
 				// which stack view was interacted with?
-				for(var i = 0; i < _this.stackDropdownViews.length; i++) {
-					var stackDropdownView = _this.stackDropdownViews[i];
-					if (selected === $(stackDropdownView.$el).get(0)) {
+				for(var i = 0; i < _this.stackMembershipViews.length; i++) {
+					var stackMembershipView = _this.stackMembershipViews[i];
+					if (selected === $(stackMembershipView.$el).get(0)) {
 						console.log('  Invoking method of subview');
-						//stackDropdownView.toggleNoteMembership(_this.model);
-						var stackModel = stackDropdownView.model;
+						//stackMembershipView.toggleNoteMembership(_this.model);
+						var stackModel = stackMembershipView.model;
 						_this.toggleStackMembership(stackModel)
 						_this.render();
 					}
@@ -207,8 +207,8 @@ var NoteEditView = Backbone.View.extend({
 			}
 		});
 		this.$el.html(this.template(context));
-		for(var i = 0; i < this.stackDropdownViews.length; i++ ) {
-			var view = this.stackDropdownViews[i];
+		for(var i = 0; i < this.stackMembershipViews.length; i++ ) {
+			var view = this.stackMembershipViews[i];
 			var stackModel = view.model;
 			var noteId = this.model.getId();
 			var shouldCheck = stackModel.hasNote(noteId);

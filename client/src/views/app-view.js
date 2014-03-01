@@ -17,8 +17,8 @@ var AppView = Backbone.View.extend({
 		// display initial stack
 		this.showStack('all');
 		// init listeners
-		this.listenTo(this.stacksCollection, 'add', this.addStackDropdownView);
-		this.listenTo(this.stacksCollection, 'change', this.refreshStackDropdownView);
+		this.listenTo(this.stacksCollection, 'add', this.addStackSelectorView);
+		this.listenTo(this.stacksCollection, 'change', this.refreshStackSelectorViews);
 		this.listenTo(this.userModel, 'change', this.userChange);
 	},
 	events: {
@@ -84,20 +84,20 @@ var AppView = Backbone.View.extend({
 		});
 		$('#notes').prepend(view.render().$el);
 	},
-	addStackDropdownView: function(stack) {
+	addStackSelectorView: function(stack) {
 		if (stack.getDeleted() == false) {
-			var view = new StackDropdownView({'model':stack});
+			var view = new StackSelectorView({'model':stack});
 			$('.js-stack-select').append(view.render().$el);
 			this.stackViews.push(view);
 		}
 	},
-	refreshStackDropdownView: function(stack) {
+	refreshStackSelectorViews: function(stack) {
 		var _this = this;
 		//<option value="all">All Notes</option>
 		//<option value="archived">Archived Notes</option>
 		$('.js-stack-select').children().not('.js-permanent').detach();
 		this.stacksCollection.each(function(stack) {
-			_this.addStackDropdownView(stack);
+			_this.addStackSelectorView(stack);
 		});
 	},
 	handleShowSettings: function(){
