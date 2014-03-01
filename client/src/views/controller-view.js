@@ -1,4 +1,3 @@
-
 var ControllerView = Backbone.View.extend({
 	/** @class ControllerView
 	 * @author dscannell

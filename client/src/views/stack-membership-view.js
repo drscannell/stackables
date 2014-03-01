@@ -1,36 +1,18 @@
-/*
- * @class StackDropdownView
- * @extends Backbone.View
- */
-var StackMembershipView = Backbone.View.extend({
+var StackMembershipView = ControllerView.extend({
+	/** @class StackMembershipView
+	 * @author drscannell
+	 * @augments ControllerView
+	 * @constructs StackMembershipView object */
+
 	tagName: 'option',
 	className: 'stack',
 	initialize: function(options) {
-		this.listenTo(this.model, 'change', this.react);
-	},
-	toggleNoteMembership: function(noteModel) {
-		console.log('StackDropdownView.toggleNoteMembership');
-		this.model.toggleNoteMembership(noteModel);
-		this.model.save(undefined, {
-			'thisView':this,
-			error:function(){
-				console.log('failed to update stack');
-			},
-			success:function(model, response, options){
-				console.log('successfully updated stack');
-				options.thisView.render();
-			}
-		});
+		this.listenTo(this.model, 'change', this.handleModelChange);
 	},
 	setChecked: function(shouldCheck) {
 		this.options.isChecked = shouldCheck;
 	},
-	isSelected: function() {
-		console.log('StackDropdownView.isSelected()');
-		console.log(this.$el.get(0));
-		return this.$el.attr('selected');
-	},
-	react: function() {
+	handleModelChange: function() {
 		if ( this.model.getDeleted() ) {
 			this.remove();
 		} else {
