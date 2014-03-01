@@ -15,6 +15,8 @@ build = (callback) ->
 	cmd = "cat client/src/model*.js " +
 		"client/src/collection*.js " +
 		"client/src/view*.js " +
+		"client/src/note-view.js " +
+		"client/src/note-edit-view.js " +
 		"client/src/main.js " +
 		"> client/lib/client.js"
 	runscript(cmd, callback)
