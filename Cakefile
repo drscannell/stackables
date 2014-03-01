@@ -12,11 +12,9 @@ runscript = (cmd, callback) ->
 # ------------ subtasks ------------
 
 build = (callback) ->
-	cmd = "cat client/src/model*.js " +
-		"client/src/collection*.js " +
-		"client/src/view*.js " +
-		"client/src/note-view.js " +
-		"client/src/note-edit-view.js " +
+	cmd = "cat client/src/models/*.js " +
+		"client/src/collections/*.js " +
+		"client/src/views/*.js " +
 		"client/src/main.js " +
 		"> client/lib/client.js"
 	runscript(cmd, callback)
