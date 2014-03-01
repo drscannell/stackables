@@ -5,23 +5,36 @@
 var NoteEditView = Backbone.View.extend({
 	tagName: 'div',
 	className: 'edit-note-pane',
-	template: Handlebars.compile( $('#edit-note-template').html() ),
+	template: Handlebars.compile($('#edit-note-template').html()),
 	initialize: function(options) {
+		// options
 		this.isNew = options.isNew;
-		console.log('---initialize NoteEditView---');
-		console.log(options.notesCollection);
+		this.stackId = options.stackId;
 		this.stacksCollection = options.stacksCollection;
 		this.notesCollection = options.notesCollection;
+		this.populateStackDropdown(this.stacksCollection);
+		this.listenTo(this.model, 'change', this.render);
+		console.log('---initialize NoteEditView---');
+		console.log('stackId: ' + this.stackId);
+		console.log(this.stacksCollection);
+		var initStack = this.stacksCollection.findWhere({
+			_id: this.stackId
+		});
+		if (initStack) {
+			console.log('lets add this bad boy');
+			this.addToStack(initStack);
+		}
+	},
+	populateStackDropdown: function(stacksCollection) {
 		this.stackDropdownViews = [];
-		var that = this;
+		var _this = this;
 		// create subview for each stack in list
 		this.stacksCollection.each(function(stack) {
 			if (stack.getDeleted() == false) {
 				var view = new StackDropdownView({'model':stack});
-				that.stackDropdownViews.push(view);
+				_this.stackDropdownViews.push(view);
 			}
 		});
-		this.listenTo(this.model, 'change', this.render);
 	},
 	events: {
 		'click input.delete': 'handleArchiveClick',
@@ -99,19 +112,26 @@ var NoteEditView = Backbone.View.extend({
 			}
 		});
 	},
-	addToCollection: function(stackModel) {
+	addToStack: function(stackModel) {
 		console.log('---NoteEditView.addToCollection---');
-		stackModel.addNote(this.model);
-		this.saveModel(stackModel, function(err, success) {
+		console.log('this.model: ' + this.model);
+		var _this = this;
+		this.saveNote(function(err, success) {
 			if (!err) {
-				console.log('saved stack');
-			} else {
-				console.log('failed to save stack');
-				console.log(err);
+				stackModel.addNote(_this.model);
+				_this.saveModel(stackModel, function(err, success) {
+					if (!err) {
+						console.log('saved stack');
+						_this.render();
+					} else {
+						console.log('failed to save stack');
+						console.log(err);
+					}
+				});
 			}
 		});
 	},
-	removeFromCollection: function(stackModel) {
+	removeFromStack: function(stackModel) {
 		console.log('---NoteEditView.removeFromCollection---');
 		stackModel.removeNote(this.model);
 		this.saveModel(stackModel, function(err, success) {
@@ -144,6 +164,7 @@ var NoteEditView = Backbone.View.extend({
 	},
 	saveModel: function(model, callback) {
 		// generic model saving method
+		// can this be moved to external controller?
 		var _this = this;
 		model.save(undefined,{
 			error:function(model, xhr, options) {
