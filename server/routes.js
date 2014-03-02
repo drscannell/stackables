@@ -15,12 +15,22 @@ module.exports = function(app, stackables) {
 		} else if ( stackables.isLoggedInAsUser(req) ) {
 			next();
 		} else {
-			res.redirect('/login.html');
+			res.redirect('/');
 		}
 	}
 
-	app.get('/', isLoggedIn, function(req, res) {
-		res.sendfile('client/index.html');
+	app.get('/', function(req, res) {
+		if ( stackables.isLoggedInAsAdmin(req) ) {
+			res.sendfile('client/index.html');
+		} else if ( stackables.isLoggedInAsUser(req) ) {
+			res.sendfile('client/index.html');
+		} else {
+			res.sendfile('client/login.html');
+		}
+	});
+
+	app.get('/login.html', function(req, res) {
+		res.redirect('/');
 	});
 
 	app.post('/login', function(req, res){
