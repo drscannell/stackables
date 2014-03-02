@@ -9,16 +9,18 @@ module.exports = function(app, stackables) {
 		next();
 	});
 
-	app.use(function(req,res,next){
+	function isLoggedIn(req, res, next) {
 		if ( stackables.isLoggedInAsAdmin(req) ) {
 			next();
 		} else if ( stackables.isLoggedInAsUser(req) ) {
 			next();
-		} else if ( req.url == '/login' ) {
-			next();
 		} else {
-			res.sendfile('client/login.html');
+			res.redirect('/login.html');
 		}
+	}
+
+	app.get('/', isLoggedIn, function(req, res) {
+		res.sendfile('client/index.html');
 	});
 
 	app.post('/login', function(req, res){
@@ -128,10 +130,6 @@ module.exports = function(app, stackables) {
 			console.log('no _id for user!');
 			res.status(400).send({'error':'No _id property found in request body'});
 		} 
-	});
-
-	app.get('/', function(req, res) {
-		res.sendfile('client/index.html');
 	});
 
 	app.use(express.directory('client'));
