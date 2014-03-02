@@ -22,6 +22,15 @@ var NoteView = Backbone.View.extend({
 		event.preventDefault();
 		this.model.fetch();
 		$(this.$el).toggleClass('inactive-note');
+		if (!this.$el.hasClass('inactive-note'))
+			this.makeVisible();
+	},
+	makeVisible: function() {
+		var scroller = $('body');
+		var padTop = 10;
+		scroller.animate({
+				scrollTop: this.$el.offset().top - padTop
+		});
 	},
 	deleteNote: function(event) {
 		event.stopPropagation();
