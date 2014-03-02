@@ -543,17 +543,26 @@ var NoteView = Backbone.View.extend({
 	toggleActive: function(event) {
 		event.stopPropagation();
 		event.preventDefault();
+		var _this = this;
 		this.model.fetch();
 		$(this.$el).toggleClass('inactive-note');
-		if (!this.$el.hasClass('inactive-note'))
-			this.makeVisible();
+		if (!this.$el.hasClass('inactive-note')) {
+			$('.note-body', this.$el).slideDown(200, function(){
+				_this.makeVisible();
+			});
+		} else {
+			$('.note-body', this.$el).slideUp(200);
+		}
 	},
-	makeVisible: function() {
+	makeVisible: function(callback) {
 		var scroller = $('body');
 		var padTop = 10;
+		var scrollTo = this.$el.offset().top - padTop;
+		var distance = Math.abs(scrollTo - scroller.scrollTop());
+		console.log('distance: ' + distance);
 		scroller.animate({
-				scrollTop: this.$el.offset().top - padTop
-		});
+				scrollTop: scrollTo
+		}, distance, function(){if(callback)callback();});
 	},
 	deleteNote: function(event) {
 		event.stopPropagation();
