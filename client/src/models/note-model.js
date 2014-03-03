@@ -4,7 +4,7 @@
  */
 var Note = Backbone.Model.extend({
 	defaults: {
-		'name':'Untitled Note',
+		'name':'',
 		'markdown':'',
 		'deleted':false
 	},

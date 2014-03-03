@@ -1,17 +1,29 @@
 /* 
  * reset 
+ *
+ * note: resets define appearance of
+ * note content in HTML form.
  */
 body {
 	margin:0;
 	padding:0;
 	font-family:'Source Sans Pro', sans-serif;
 }
-h1 { font-size:2.00em;font-weight:normal;margin:1em 0 1em 0; }
-h2 { font-size:1.75em;font-weight:normal;margin:1em 0 1em 0; }
-h3 { font-size:1.50em;font-weight:normal;margin:1em 0 1em 0; }
-h4 { font-size:1.25em;font-weight:normal;margin:1em 0 1em 0; }
-h5 { font-size:1.00em;font-weight:bold;margin:1em 0 1em 0;  }
-h6 { font-size:1.00em;font-weight:bold;margin:1em 0 1em 0; }
+/*
+ * headings
+ */
+h1,h2,h3,h4,h5,h6 {margin:1em 0 1em 0;}
+h1,h2,h3,h4 {font-weight:normal;}
+h5,h6 {font-weight:bold;}
+h1 {font-size:2.00em;}
+h2 {font-size:1.75em;}
+h3 {font-size:1.50em;}
+h4 {font-size:1.25em;}
+h5 {font-size:1.00em;}
+h6 {font-size:1.00em;}
+/*
+ * code blocks
+ */
 pre { 
 	margin:1em;
 	border:1px solid #CCC; 
@@ -19,56 +31,104 @@ pre {
 	overflow:auto;
 	-webkit-overflow-scrolling:touch; 
 }
-/* table styling */
+/*
+ * tables
+ */
 table {border-collapse:collapse;}
 table, th, td {
 	border:1px solid rgb(245,242,240);
 	margin:1em 0 1em 0;padding:0;}
 th {background-color:rgb(245,242,240);}
 td,th {padding:5px;}
+/*
+ * divs, paragraphs, blockquotes 
+ */
 div {margin:0;border:0;outline:0;padding:0;}
 p {margin:0 0 0.5em 0;border:0;outline:0;padding:0;}
 blockquote {margin:1em 1.5em 1em 1.5em;border:0;outline:0;padding:0;}
+/* 
+ * character styles
+ */
 b,strong {font-weight:bold;}
 i,em {font-style:italic;}
 a {text-decoration:none;word-wrap:break-word;}
+/* 
+ * horizontal rules 
+ */
 hr {
 	border:0;
 	border-top:1px solid;
 	margin:10px 0 10px 0;
 	border-color:rgb(225,222,220);
 }
+/* -------------------------------------
+ * App styles
+ */
 hr.rule {
 	border:0;
 	border-top:1px solid;
 	margin:10px 0 10px 0;
 }
-/* 
- * App header/footer
+div.app {
+	margin:0;
+	padding:0;
+	outline:0;
+	border:0;
+	background:white;
+}
+/*
+ * app header
  */
-div.app {margin:0;padding:0;outline:0;border:0;background:white;}
-header.app {padding:10px 0 10px 0;margin:0;overflow:hidden;font-size:1em;}
-h1.app-header {text-align:center;margin:5px;font-size:1em;font-weight:normal;}
-footer.app {padding:10px 0 10px 0;margin:10px 0 0 0;border-top:1px solid;overflow:hidden;font-size:0.8em;}
-h1.app-footer {text-align:center;margin:5px;font-size:1em;font-weight:normal;}
+header.app {
+	padding:10px 0 10px 0;
+	margin:0;
+	overflow:hidden;
+	font-size:1em;
+}
+h1.app-header {
+	text-align:center;
+	margin:5px;
+	font-size:1em;
+	font-weight:normal;
+}
+/*
+ * app footer
+ */
+footer.app {
+	padding:10px 0 10px 0;
+	margin:10px 0 0 0;
+	border-top:1px solid;
+	overflow:hidden;
+	font-size:0.8em;
+}
+h1.app-footer {
+	text-align:center;
+	margin:5px;
+	font-size:1em;
+	font-weight:normal;
+}
 a.app-footer {color:inherit;}
 a.app-footer:hover {text-decoration:underline;}
 /*
  * note view
  */
-section.notes {margin:1px 0 1px 0;}
-article.note {margin:0;}
+section.notes {
+	margin:1px 0 1px 0;
+}
+article.note {
+	margin:0;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+}
 h1.note {
 	font-size:1em;
 	margin:0;
 	padding:10px;
 	border:0;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 section.note-body {
 	margin:0;
 	padding:5px 15px 50px 15px;
-}
-article.inactive-note > section.note-body {
 	display:none;
 }
 /*
@@ -84,10 +144,18 @@ div.edit-note-pane {
 	text-align:center;
 }
 /*
- * edit user view
+ * edit user view (settings)
  */
 div.edit-user-pane {
 	text-align:center;
+}
+ul.stack-manager-list {
+	list-style-type: none;
+}
+li.stack-manager-list {
+	text-align:left;
+	padding:0;
+	margin-bottom:5px;
 }
 /* 
  * buttons 
@@ -140,14 +208,6 @@ select.dropdown {
 	-webkit-appearance: none;
 	padding:5px;
 	width:80%;
-	/*display:inline-block;
-	margin:0;
-	padding:5px;
-	-webkit-appearance: none;
-	border:1px solid;
-	width:90%;
-	text-align:center;
-	min-height:50px;*/
 }
 
 /* 
@@ -162,28 +222,12 @@ section.form {border:1px solid #aaa;padding:5px;margin:5px 0 5px 0;}
  */
 div.text-input {text-align:left;margin:5px;padding:0;}
 span.text-input-label {display:block;font-size:0.9em;text-align:left;}
-input.text {
-	width:95%;
-}
-.success > .feedback {color:#88aa33;}
-.success > .feedback:before {content:"✓";margin-left:5px;font-size:1.5em;line-height:1px;}
-.error > .feedback {color:#aa5533;}
-.error > .feedback:before {content:"✗";margin-left:5px;font-size:1.5em;line-height:1px;}
+input.text {width:95%;}
 /*
  * text area
  */
 textarea.textarea {
 	min-width:95%;
 	min-height:24em;
-}
-
-
-ul.stack-manager-list {
-	list-style-type: none;
-}
-li.stack-manager-list {
-	text-align:left;
-	padding:0;
-	margin-bottom:5px;
 }
 
