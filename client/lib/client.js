@@ -200,6 +200,7 @@ var AppView = Backbone.View.extend({
 		this.listenTo(this.stacksCollection, 'add', this.addStackSelectorView);
 		this.listenTo(this.stacksCollection, 'change', this.refreshStackSelectorViews);
 		this.listenTo(this.userModel, 'change', this.userChange);
+		$(window).focus({'_this':this}, this.handleWindowFocus);
 	},
 	events: {
 		'click input.js-add-note': 'handleNewNote',
@@ -207,6 +208,13 @@ var AppView = Backbone.View.extend({
 		'click input.js-logout': 'handleLogout',
 		'click input.js-settings': 'handleShowSettings',
 		'change select.js-stack-select': 'handleShowStack'
+	},
+	/** On window focus, reset the collection.
+	 * Reset event handled elsewhere
+	 * @param {$Event} jQuery Event */
+	handleWindowFocus: function(event) {
+		var _this = event.data._this;
+		_this.notesCollection.fetch({reset:true});
 	},
 	handleShowStack: function(event) {
 		event.stopPropagation();
@@ -222,7 +230,26 @@ var AppView = Backbone.View.extend({
 			this.isShowingArchive = (stackId === 'archived');
 			this.notesCollection = new NoteList([], {'stackId':stackId});
 			this.listenTo(this.notesCollection, 'add', this.addNoteView);
+			this.listenTo(this.notesCollection, 'reset', this.handleReset);
 		}
+	},
+	/** When notes collection reset, see if any are new. If so,
+	 * add to UI. This only works on desktop right now. There
+	 * doesn't seem to be a way to detect window focus in mobile.
+	 * @param {Backbone.Collection.ResetEvent?}
+	 * @param {Backbone.Collection.ResetOptions?} */
+	handleReset: function(ev, options) {
+		var _this = this;
+		// I wish this were in CoffeeScript! I hate these 
+		// underscore callback loops!
+		ev.models.forEach(function(model) {
+			var isOld = _.find(options.previousModels, function(m){
+				return m.getId() === model.getId();
+			});
+			if (!isOld) {
+				_this.addNoteView(model);
+			}
+		});
 	},
 	handleNewNote: function(event) {
 		event.stopPropagation();
@@ -554,12 +581,13 @@ var NoteView = Backbone.View.extend({
 			$('.note-body', this.$el).slideUp(200);
 		}
 	},
+	/** Scroll the body so that this note is visible 
+	 * @param {Function} optional callback */
 	makeVisible: function(callback) {
 		var scroller = $('body');
 		var padTop = 10;
 		var scrollTo = this.$el.offset().top - padTop;
 		var distance = Math.abs(scrollTo - scroller.scrollTop());
-		console.log('distance: ' + distance);
 		scroller.animate({
 				scrollTop: scrollTo
 		}, distance, function(){if(callback)callback();});
