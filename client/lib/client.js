@@ -239,9 +239,8 @@ var AppView = Backbone.View.extend({
 	 * @param {Backbone.Collection.ResetEvent?}
 	 * @param {Backbone.Collection.ResetOptions?} */
 	handleReset: function(ev, options) {
+		/*
 		var _this = this;
-		// I wish this were in CoffeeScript! I hate these 
-		// underscore callback loops!
 		ev.models.forEach(function(model) {
 			var isOld = _.find(options.previousModels, function(m){
 				return m.getId() === model.getId();
@@ -250,6 +249,7 @@ var AppView = Backbone.View.extend({
 				_this.addNoteView(model);
 			}
 		});
+		*/
 	},
 	handleNewNote: function(event) {
 		event.stopPropagation();
@@ -290,6 +290,8 @@ var AppView = Backbone.View.extend({
 			'showArchivedNotes':(this.isShowingArchive == true)
 		});
 		$('#notes').prepend(view.render().$el);
+
+		
 	},
 	addStackSelectorView: function(stack) {
 		if (stack.getDeleted() == false) {
