@@ -2,15 +2,13 @@
 var fs = require('fs');
 var app = require('express')();
 var mongoose = require('mongoose');
+var passport = require('passport');
 
 // mongo connect
-var mongoURI = process.env.LOCAL_MONGO_URI || process.env.MONGOLAB_URI ||  null;
-
-if (mongoURI == null) 
+var configDB = require('./config/database.js');
+if (configDB.url == null) 
 	throw new Error('Mongo URI environment variable not set up');
-
-mongoose.connect(mongoURI);
-
+mongoose.connect(configDB.url);
 var db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'connection error:'));
