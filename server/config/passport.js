@@ -1,14 +1,15 @@
 var LocalStrategy = require('passport-local').Strategy;
+/*
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+*/
 
-var User = require('../models.js').User;
 
 // load credentials
 var configAuth = require('./auth');
 
-module.exports = function(passport) {
+module.exports = function(passport, User) {
 	passport.serializeUser(function(user, done) {
 		done(null, user.id);
 	});
@@ -67,6 +68,7 @@ module.exports = function(passport) {
 
 	// ------------ facebook login --------------
 	
+	/*
 	passport.use(new FacebookStrategy({
 		clientID: configAuth.facebookAuth.clientID,
 		clientSecret: configAuth.facebookAuth.clientSecret,
@@ -129,10 +131,11 @@ module.exports = function(passport) {
 			}
 		});
 	}));
-
+	*/
 
 	// ----------------- twitter login --------------
 	
+	/*
 	passport.use(new TwitterStrategy({
 		consumerKey: configAuth.twitterAuth.consumerKey,
 		consumerSecret: configAuth.twitterAuth.consumerSecret,
@@ -189,10 +192,11 @@ module.exports = function(passport) {
 			}
 		});
 	}));
-	
+	*/
 
 	// ----------------- google login -------------------
 	
+	/*
 	passport.use(new GoogleStrategy({
 		clientID: configAuth.googleAuth.clientID,
 		clientSecret: configAuth.googleAuth.clientSecret,
@@ -250,5 +254,5 @@ module.exports = function(passport) {
 			}
 		});
 	}));
-
+	*/
 };

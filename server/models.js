@@ -26,7 +26,6 @@ module.exports = function() {
 
 	var userSchema = mongoose.Schema({
 		'local': {
-			'username': String,
 			'password': String,
 			'email': String
 		},
