@@ -4,31 +4,25 @@ module.exports = function(app, stackables, passport) {
 
 
 	app.get('/', function(req, res) {
+		console.log('auth? ' + req.isAuthenticated());
 		if (req.isAuthenticated()) {
-			res.send('logged in');
+			res.sendfile('client/index.html');
 		} else {
-			res.sendfile('client/login.html');
+			res.render('../client/login.ejs', {
+				messages:req.flash('loginMessage')
+			});
 		}
 	});
 
-	/*
+	app.get('/logout', function(req,res) {
+		req.logout();
+		res.redirect('/');
+	});
 	app.post('/login', passport.authenticate('local-login', {
 		successRedirect: '/',
 		failureRedirect: '/',
 		failureFlash: true
 	}));
-	*/
-	app.post('/login', function(req, res) {
-		passport.authenticate('local-login', function(err, user, info) {
-			if (!err) {
-				console.log('no err');
-				res.send({'err':null, 'success':'logged in'});
-			} else {
-				console.log(err);
-				res.send({'err':err, 'success':null});
-			}
-		})(req, res);
-	});
 	app.post('/signup', passport.authenticate('local-signup', {
 		successRedirect: '/',
 		failureRedirect: '/',
@@ -74,11 +68,13 @@ module.exports = function(app, stackables, passport) {
 			res.sendfile('client/login.html');
 		}
 	});
+	*/
 
 	app.get('/login.html', function(req, res) {
 		res.redirect('/');
 	});
 
+	/*
 	app.post('/login', function(req, res){
 		stackables.login(req, res, function(err, res_status) {
 			if (!err) {
@@ -98,6 +94,7 @@ module.exports = function(app, stackables, passport) {
 			}
 		});
 	});
+	*/
 
 	app.get('/notes', isLoggedIn, function(req, res) {
 		var stackId = ('stackId' in req.query) ? req.query.stackId : null;
@@ -129,7 +126,10 @@ module.exports = function(app, stackables, passport) {
 	});
 
 	app.get('/stacks', isLoggedIn, function(req, res) {
-		var userId = stackables.getUserIdFromCookie(req);
+		console.log('req.user');
+		console.log(req.user);
+		//var userId = stackables.getUserIdFromCookie(req);
+		var userId = req.user._id;
 		stackables.getAllStacks(userId, function(err, data) {
 			if (!err) {
 				res.status(200).send(data);
@@ -162,6 +162,8 @@ module.exports = function(app, stackables, passport) {
 	});
 
 	app.get('/user', isLoggedIn, function(req, res) {
+		res.status(200).send(req.user);
+		/*
 		var id = stackables.getUserIdFromCookie(req);
 		stackables.getUserById(id, function(err, data) {
 			if (!err) {
@@ -170,6 +172,7 @@ module.exports = function(app, stackables, passport) {
 				res.status(501).send(err);
 			}
 		});
+		*/
 	});
 
 	app.post('/user', isLoggedIn, function(req, res){
@@ -187,7 +190,6 @@ module.exports = function(app, stackables, passport) {
 			res.status(400).send({'error':'No _id property found in request body'});
 		} 
 	});
-	*/
 
 	app.use(express.directory('client'));
 	app.use(express.static('client'));

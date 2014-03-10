@@ -25,6 +25,7 @@ db.once('open', function(){
 		app.use(express.logger('dev'));
 		app.use(express.cookieParser());
 		app.use(express.bodyParser());
+		app.set('view engine', 'ejs');
 		app.use(express.session({secret:'digdug'}));
 		app.use(passport.initialize());
 		app.use(passport.session());
