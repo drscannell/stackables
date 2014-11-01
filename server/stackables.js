@@ -186,7 +186,8 @@ module.exports = function(models){
 
 	// Add a single note
 	stackables.addNote = function(req, res) {
-		req.body.createdby = stackables.getUserObjectIdFromCookie(req);
+		//req.body.createdby = stackables.getUserObjectIdFromCookie(req);
+		req.body.createdby = new mongoose.Types.ObjectId(req.user._id);
 		console.log('name: ' + req.body.name);
 		console.log('createdby: ' + req.body.createdby);
 		var newNote = new models.Note(req.body);
@@ -226,7 +227,9 @@ module.exports = function(models){
 	// Fetch all non-deleted notes
 	// Recurse up to 5 times if db connection is not open.
 	stackables.getAllNotes = function(req, res, attempts) {
-		var userObjectId = stackables.getUserObjectIdFromCookie(req);
+		//var userObjectId = stackables.getUserObjectIdFromCookie(req);
+		//var userObjectId = new mongoose.Types.ObjectId(req.user._id);
+		var userObjectId = req.user._id;
 		var query = {'deleted':false, 'createdby':userObjectId};
 		console.log('get all notes created by ' + query.createdby);
 		models.Note.find( query,undefined,{sort:{'_id':1}}, function(err, notes) {

@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var bcrypt   = require('bcrypt-nodejs');
 
 /*
  * Mongoose Models
@@ -24,16 +25,38 @@ module.exports = function() {
 	models.Note = mongoose.model('Note', noteSchema);
 
 	var userSchema = mongoose.Schema({
-		'username': String,
-		'password': String,
-		'email': String,
-		'colorScheme':{
-			'appColor': String,
-			'noteColor': String,
-			'buttonColor': String
+		'local': {
+			'password': String,
+			'email': String
+		},
+		'facebook': {
+			'id': String,
+			'token': String,
+			'email': String,
+			'name': String
+		},
+		'twitter': {
+			'id': String,
+			'token': String,
+			'displayName': String,
+			'username': String
+		},
+		'google': {
+			'id': String,
+			'token': String,
+			'email': String,
+			'name': String
 		},
 		'stacks': Array
 	}, {'collection':'users'});
+	
+	userSchema.methods.generateHash = function(password) {
+		return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+	};
+
+	userSchema.methods.validPassword = function(password) {
+		return bcrypt.compareSync(password, this.local.password);
+	};
 
 	models.User = mongoose.model('User', userSchema);
 
