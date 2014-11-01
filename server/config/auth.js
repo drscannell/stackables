@@ -10,8 +10,8 @@ module.exports = {
 		'callbackURL': 'http://localhost:8080/auth/twitter/callback'
 	},
 	'googleAuth' : {
-		'clientID': process.env.AUTH_TEST_GOOGLE_ID,
-		'clientSecret': process.env.AUTH_TEST_GOOGLE_SECRET,
-		'callbackURL': 'http://localhost:8080/auth/google/callback'
+		'clientID': process.env.STACKABLES_GOOGLE_ID,
+		'clientSecret': process.env.STACKABLES_GOOGLE_SECRET,
+		'callbackURL': process.env.STACKABLES_GOOGLE_CALLBACK || 'http://localhost:8080/auth/google/callback'
 	}
 }
