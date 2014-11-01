@@ -2,8 +2,8 @@ var LocalStrategy = require('passport-local').Strategy;
 /*
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
-var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 */
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 
 // load credentials
@@ -198,7 +198,6 @@ module.exports = function(passport, User) {
 
 	// ----------------- google login -------------------
 	
-	/*
 	passport.use(new GoogleStrategy({
 		clientID: configAuth.googleAuth.clientID,
 		clientSecret: configAuth.googleAuth.clientSecret,
@@ -256,5 +255,4 @@ module.exports = function(passport, User) {
 			}
 		});
 	}));
-	*/
 };

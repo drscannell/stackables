@@ -34,6 +34,29 @@ module.exports = function(app, stackables, passport) {
 		failureFlash: true
 	}));
 
+	// Google Routes
+	app.get('/auth/google', passport.authenticate('google', {
+		scope: ['profile', 'email']
+	}));
+	app.get('/auth/google/callback', passport.authenticate('google', {
+		successRedirect: '/',
+		failureRedirect: '/'
+	}));
+	app.get('/connect/google', passport.authenticate('google', {
+		scope: ['email']
+	}));
+	app.get('/connect/google/callback', passport.authenticate('google', {
+		successRedirect: '/',
+		failureRedirect: '/'
+	}));
+	app.get('/unlink/google', function(req, res) {
+		var user = req.user;
+		user.google.token = undefined;
+		user.save(function(err) {
+			res.redirect('/');
+		});
+	});
+
 	function isLoggedIn(req, res, next) {
 		if (req.isAuthenticated()) {
 			return next();
