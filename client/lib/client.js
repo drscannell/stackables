@@ -318,9 +318,12 @@ var AppView = Backbone.View.extend({
 			
 	},
 	handleLogout: function() {
+		window.location = '/logout';
+		/*
 		jQuery.post('logout', function(data) {
 			location.reload();
 		});
+		*/
 	},
 	render: function() {
 		
