@@ -1,4 +1,5 @@
 var express = require('express');
+var path = require('path');
 
 module.exports = function(app, stackables, passport) {
 
@@ -6,9 +7,11 @@ module.exports = function(app, stackables, passport) {
 	app.get('/', function(req, res) {
 		console.log('auth? ' + req.isAuthenticated());
 		if (req.isAuthenticated()) {
-			res.sendfile('client/index.html');
+			var p = path.resolve(__dirname + '/../client/index.html');
+			res.sendfile(p);
 		} else {
-			res.render('../client/login.ejs', {
+			var p = path.resolve(__dirname + '/../client/login.ejs');
+			res.render(p, {
 				messages:req.flash('loginMessage')
 			});
 		}
@@ -214,6 +217,6 @@ module.exports = function(app, stackables, passport) {
 		} 
 	});
 
-	app.use(express.directory('client'));
-	app.use(express.static('client'));
+	app.use(express.directory(__dirname + '/../client'));
+	app.use(express.static(__dirname + '/../client'));
 };
