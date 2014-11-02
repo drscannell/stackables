@@ -1,8 +1,8 @@
 /*
- * @class NoteView
+ * @class NoteSkimView
  * @extends Backbone.View
  */
-var NoteView = Backbone.View.extend({
+var NoteSkimView = Backbone.View.extend({
 	tagName: 'article',
 	className: 'note inactive-note',
 	template: Handlebars.compile( $('#note-template').html() ),
@@ -13,9 +13,22 @@ var NoteView = Backbone.View.extend({
 		this.showArchivedNotes = options.showArchivedNotes;
 	},
 	events: {
+		'click':'showMasterView'
+	},
+	/*
+	events: {
 		'click input.delete': 'deleteNote',
 		'click input.edit': 'editNote',
 		'click h1.note': 'toggleActive'
+	},
+	*/
+	showMasterView: function(event) {
+		console.log('showMasterView');
+		var view = new NoteMasterView({
+			'model':this.model, 
+			'stacksCollection':this.stacksCollection
+		});
+		$('body').append(view.render().$el);
 	},
 	toggleActive: function(event) {
 		event.stopPropagation();
@@ -80,4 +93,5 @@ var NoteView = Backbone.View.extend({
 		return this; 
 	}
 });
+
 

@@ -103,7 +103,7 @@ var AppView = Backbone.View.extend({
 		$('body').append(view.render().$el);
 	},
 	addNoteView: function(note) {
-		var view = new NoteView({
+		var view = new NoteSkimView({
 			'model':note, 
 			'stacksCollection':this.stacksCollection,
 			'showUnarchivedNotes':(this.isShowingArchive == false),

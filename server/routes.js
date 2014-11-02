@@ -67,60 +67,10 @@ module.exports = function(app, stackables, passport) {
 		res.redirect('/');
 	};
 	
-	/*
-	app.use(express.bodyParser());
-	app.use(express.cookieParser('321!!'));
-	app.use(function(req,res,next){
-		console.log('\n' + req.method + ' ' + req.url);
-		next();
-	});
-
-	function isLoggedIn(req, res, next) {
-		if ( stackables.isLoggedInAsAdmin(req) ) {
-			next();
-		} else if ( stackables.isLoggedInAsUser(req) ) {
-			next();
-		} else {
-			res.redirect('/');
-		}
-	}
-
-	app.get('/', function(req, res) {
-		if ( stackables.isLoggedInAsAdmin(req) ) {
-			res.sendfile('client/index.html');
-		} else if ( stackables.isLoggedInAsUser(req) ) {
-			res.sendfile('client/index.html');
-		} else {
-			res.sendfile('client/login.html');
-		}
-	});
-	*/
 
 	app.get('/login.html', function(req, res) {
 		res.redirect('/');
 	});
-
-	/*
-	app.post('/login', function(req, res){
-		stackables.login(req, res, function(err, res_status) {
-			if (!err) {
-				res.status(200).send({'success':'credentials accepted'});
-			} else {
-				res.status(res_status).send(err);
-			}
-		});
-	});
-
-	app.post('/logout', function(req, res){
-		stackables.logout(req, res, function(err){
-			if (!err) {
-				res.status(200).send('logged out');	
-			} else {
-				res.status(500).send(err);
-			}
-		});
-	});
-	*/
 
 	app.get('/notes', isLoggedIn, function(req, res) {
 		var stackId = ('stackId' in req.query) ? req.query.stackId : null;
@@ -136,6 +86,23 @@ module.exports = function(app, stackables, passport) {
 			stackables.getAllArchivedNotes(req, res, 1);
 		} else {
 			stackables.getAllNotes(req, res, 1);
+		}
+	});
+
+	app.get('/noteslist', isLoggedIn, function(req, res) {
+		var stackId = ('stackId' in req.query) ? req.query.stackId : null;
+		if(stackId && stackId != 'all' && stackId != 'archived') {
+			stackables.getNotesListByStackId(req.query.stackId, function(err, data) {
+				if (!err) {
+					res.status(200).send(data);
+				} else {
+					res.status(501).send(err);
+				}
+			});
+		} else if (stackId && stackId == 'archived') {
+			stackables.getAllArchivedNotesList(req, res, 1);
+		} else {
+			stackables.getAllNotesList(req, res, 1);
 		}
 	});
 

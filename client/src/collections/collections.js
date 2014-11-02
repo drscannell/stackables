@@ -19,9 +19,9 @@ var NoteList = Backbone.Collection.extend({
 	model: Note,
 	url: function() {
 		if (this.stackId) {
-			return '/notes?stackId=' + this.stackId;
+			return '/noteslist?stackId=' + this.stackId;
 		} else {
-			return '/notes';
+			return '/noteslist';
 		}
 	},
 	initialize: function(models, options) {

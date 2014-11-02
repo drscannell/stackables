@@ -154,9 +154,50 @@ module.exports = function(models){
 		});
 	};
 
+	// @function getAllStacksList
+	stackables.getAllStacksList = function(userId, callback) {
+		stackables.getUserById(userId, function(err, user) {
+			if (!err) {
+				// extract id array from user object
+				var idArray = [];
+				for (var i = 0; i < user.stacks.length; i++ ) {
+					idArray.push(user.stacks[i].stackId);
+				}
+				stackables.getStacksListByIdArray(idArray, function(err, stacks) {
+					if (!err && stacks != null) {
+						callback(null, stacks);
+					} else {
+						callback({'error':'Unable to fetch stacks'}, null);
+					}
+				});		
+			} else {
+				callback({'error':'Unable to get user from database.'}, null);
+			}
+		});
+	};
+
 	// @function getStacksByIdArray
 	stackables.getStacksByIdArray = function(idArray, callback) {
 		models.Stack.find({'_id': {$in:idArray}}, function(err, stacks) {
+			if (!err) {
+				// add isDeleted attr if missing
+				for(var i = 0; i < stacks.length; i++) {
+					if(!('isDeleted' in stacks[i])) {
+						stacks[i].isDeleted = false;
+					}
+				}
+				callback(null, stacks);
+			} else {
+				console.log(err);
+				callback({'error':'Unable to find stacks in database'}, null);
+			}
+		});
+	};
+
+	// @function getStacksListByIdArray
+	stackables.getStacksListByIdArray = function(idArray, callback) {
+		models.Stack.find({'_id': {$in:idArray}}, 
+				{'name':1, 'createdby':1, 'deleted':1},  function(err, stacks) {
 			if (!err) {
 				// add isDeleted attr if missing
 				for(var i = 0; i < stacks.length; i++) {
@@ -233,6 +274,27 @@ module.exports = function(models){
 		var query = {'deleted':false, 'createdby':userObjectId};
 		console.log('get all notes created by ' + query.createdby);
 		models.Note.find( query,undefined,{sort:{'_id':1}}, function(err, notes) {
+			if(!err) {
+				console.log('Retrieved ' + notes.length + ' notes from mongo');
+				res.send(notes);
+			} else {
+				res.status(501);
+				res.send({'error':'Failed to retrieve data from database.'});
+			}
+		});
+	};
+
+	// Fetch all non-deleted notes
+	// Recurse up to 5 times if db connection is not open.
+	stackables.getAllNotesList = function(req, res, attempts) {
+		//var userObjectId = stackables.getUserObjectIdFromCookie(req);
+		//var userObjectId = new mongoose.Types.ObjectId(req.user._id);
+		var userObjectId = req.user._id;
+		console.log('get all notes created by ' + userObjectId);
+		models.Note.find({'deleted':false, 'createdby':userObjectId}, 
+				{'name':1, 'createdby':1, 'deleted':1},
+				{sort:{'_id':1}}, 
+				function(err, notes) {
 			if(!err) {
 				console.log('Retrieved ' + notes.length + ' notes from mongo');
 				res.send(notes);
